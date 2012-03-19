@@ -171,18 +171,12 @@ public class PEContainer implements Runnable, AsynchronousEventProcessor {
 		return false;
 	}
 
-	private long starttime = System.currentTimeMillis();
-	private long endtime = starttime;
-	private int eventcount = 0;
-
 	public void run() {
 		long startTime, endTime;
 		while (true) {
 			EventWrapper eventWrapper = null;
 			try {
 				eventWrapper = workQueue.take();
-				//
-				eventcount++;
 				if (clock instanceof EventClock) {
 					EventClock eventClock = (EventClock) clock;
 					eventClock.update(eventWrapper);
@@ -204,8 +198,7 @@ public class PEContainer implements Runnable, AsynchronousEventProcessor {
 
 				startTime = System.currentTimeMillis();
 				if (logger.isDebugEnabled()) {
-					logger.debug("STEP 5 (PEContainer): workQueue.take - "
-							+ eventWrapper.toString());
+					logger.debug("STEP 5 (PEContainer): workQueue.take - " + eventWrapper.toString());
 				}
 				// Logger.getLogger("s4").debug(
 				// "Incoming: " + event.getEventName());
@@ -269,13 +262,7 @@ public class PEContainer implements Runnable, AsynchronousEventProcessor {
 				}
 
 				endTime = System.currentTimeMillis();
-				//
-				if (eventcount % 1000 == 0) {
-					endtime = System.currentTimeMillis();
-					System.out.println("The interval is:"
-							+ (endtime - starttime));
-					starttime = endtime;
-				}
+				
 				if (monitor != null) {
 					// TODO: need to be changed for more accurate calc
 					monitor.increment(pecontainer_exec_elapse_time.toString(),
@@ -286,8 +273,7 @@ public class PEContainer implements Runnable, AsynchronousEventProcessor {
 				Logger.getLogger("s4").warn("PEContainer is interrupted", ie);
 				return;
 			} catch (Exception e) {
-				Logger.getLogger("s4").error(
-						"Exception choosing processing element to run", e);
+				Logger.getLogger("s4").error("Exception choosing processing element to run", e);
 			}
 		}
 	}

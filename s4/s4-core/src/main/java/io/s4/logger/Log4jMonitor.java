@@ -22,95 +22,97 @@ import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Log4jMonitor extends TimerTask implements Monitor {
-	Map<String, Integer> metricMap = new ConcurrentHashMap<String, Integer>();
-	private String loggerName = "s4";
-	private int flushInterval = 600; // default is every 10 minutes
+    Map<String, Integer> metricMap = new ConcurrentHashMap<String, Integer>();
+    private String loggerName = "s4";
+    private int flushInterval = 600; // default is every 10 minutes
 
-	private Timer timer = new Timer();
-	private Map<String, Integer> defaultMap = new HashMap<String, Integer>();
+    private Timer timer = new Timer();
+    private Map<String, Integer> defaultMap = new HashMap<String, Integer>();
 
-	public void setLoggerName(String loggerName) {
-		this.loggerName = loggerName;
-	}
+    public void setLoggerName(String loggerName) {
+        this.loggerName = loggerName;
+    }
 
-	public void setFlushInterval(int flushInterval) {
-		this.flushInterval = flushInterval;
-	}
+    public void setFlushInterval(int flushInterval) {
+        this.flushInterval = flushInterval;
+    }
 
-	public void init() {
-		if (flushInterval > 0) {
-			timer.scheduleAtFixedRate(this, flushInterval * 1000,
-					flushInterval * 1000);
-		}
-	}
+    public void init() {
+        if (flushInterval > 0) {
+            timer.scheduleAtFixedRate(this,
+                                      flushInterval * 1000,
+                                      flushInterval * 1000);
+        }
+    }
 
-	// TODO: this will be removed after changing above functions
-	public void set(String metricName, int value) {
-		metricMap.put(metricName, value);
-	}
+    // TODO: this will be removed after changing above functions
+    public void set(String metricName, int value) {
+        metricMap.put(metricName, value);
+    }
 
-	public void flushStats() {
-		org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(loggerName);
-		for (String key : metricMap.keySet()) {
-			String message = key + " = " + metricMap.get(key);
-			logger.info(message);
-			metricMap.remove(key);
-		}
-		if (defaultMap != null) {
-			for (String key : defaultMap.keySet()) {
-				// TODO: need to be changed
-				set(key, defaultMap.get(key));
-			}
-		}
-	}
+    public void flushStats() {
+        org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(loggerName);
+        for (String key : metricMap.keySet()) {
+            String message = key + " = " + metricMap.get(key);
+            logger.info(message);
+            metricMap.remove(key);
+        }
+        if (defaultMap != null) {
+            for (String key : defaultMap.keySet()) {
+                // TODO: need to be changed
+                set(key, defaultMap.get(key));
+            }
+        }
+    }
 
-	public void run() {
-		flushStats();
-	}
+    public void run() {
+        flushStats();
+    }
 
-	@Override
-	public void increment(String metricName, int increment) {
-		Integer currValue = metricMap.get(metricName);
-		if (currValue == null) {
-			currValue = 0;
-		}
-		currValue += increment;
-		metricMap.put(metricName, currValue);
-	}
+    @Override
+    public void increment(String metricName, int increment) {
+        Integer currValue = metricMap.get(metricName);
+        if (currValue == null) {
+            currValue = 0;
+        }
+        currValue += increment;
+        metricMap.put(metricName, currValue);
+    }
 
-	@Override
-	public void setDefaultValue(String key, int val) {
-		// TODO Auto-generated method stub
+    @Override
+    public void setDefaultValue(String key, int val) {
+        // TODO Auto-generated method stub
 
-	}
+    }
 
-	@Override
-	public void increment(String metricName, int increment,
-			String metricEventName, String... furtherDistinctions) {
-		increment(buildMetricName(metricName, metricEventName,
-						furtherDistinctions), increment);
+    @Override
+    public void increment(String metricName, int increment, String metricEventName, String... furtherDistinctions) {
+        increment(buildMetricName(metricName,
+                                  metricEventName,
+                                  furtherDistinctions),
+                  increment);
 
-	}
+    }
 
-	@Override
-	public void set(String metricName, int value, String metricEventName,
-			String... furtherDistinctions) {
-		metricMap.put(buildMetricName(metricName, metricEventName,
-						furtherDistinctions), value);
-	}
+    @Override
+    public void set(String metricName, int value, String metricEventName, String... furtherDistinctions) {
+        metricMap.put(buildMetricName(metricName,
+                                      metricEventName,
+                                      furtherDistinctions),
+                      value);
+    }
 
-	private String buildMetricName(String metricName, String metricEventName,
-			String[] furtherDistinctions) {
-		StringBuffer sb = new StringBuffer(metricEventName);
-		sb.append(":");
-		sb.append(metricName);
-		if (furtherDistinctions != null) {
-			for (String furtherDistinction : furtherDistinctions) {
-				sb.append(":");
-				sb.append(furtherDistinction);
-			}
-		}
-		return sb.toString().intern();
+    private String buildMetricName(String metricName, String metricEventName, String[] furtherDistinctions) {
+        StringBuffer sb = new StringBuffer(metricEventName);
+        sb.append(":");
+        sb.append(metricName);
+        if (furtherDistinctions != null) {
+            for (String furtherDistinction : furtherDistinctions) {
+                sb.append(":");
+                sb.append(furtherDistinction);
+            }
+        }
+        return sb.toString().intern();
 
-	}
+    }
 }

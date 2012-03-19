@@ -180,9 +180,7 @@ public class Adapter {
 
 				if (event instanceof Request)
 					decorateRequest((Request) event);
-
-				dispatcher.dispatchEvent(stream, event);
-				// dispatcher.dispatchEvent(stream, keys, event);
+					dispatcher.dispatchEvent(stream, keys, event);
 
 			} catch (Exception e) {
 				Logger.getLogger("adapter").info("Exception adapting event", e);

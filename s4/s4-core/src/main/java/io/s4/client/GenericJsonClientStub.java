@@ -27,76 +27,76 @@ import org.json.JSONObject;
 
 public class GenericJsonClientStub extends ClientStub {
 
-	// private static final ObjectBuilder builder = new ObjectBuilder();
-	// private static final Gson builder = new Gson();
+    // private static final ObjectBuilder builder = new ObjectBuilder();
+    // private static final Gson builder = new Gson();
 
-	private static final Info protocolInfo = new Info("generic-json", 1, 0);
+    private static final Info protocolInfo = new Info("generic-json", 1, 0);
 
-	@Override
-	public Info getProtocolInfo() {
-		return protocolInfo;
-	}
+    @Override
+    public Info getProtocolInfo() {
+        return protocolInfo;
+    }
 
-	@Override
-	public EventWrapper eventWrapperFromBytes(byte[] v) {
-		try {
-			// interpret v as a JSON string
-			String s = new String(v, Charset.forName("UTF8"));
-			JSONObject json = new JSONObject(s);
+    @Override
+    public EventWrapper eventWrapperFromBytes(byte[] v) {
+        try {
+            // interpret v as a JSON string
+            String s = new String(v, Charset.forName("UTF8"));
+            JSONObject json = new JSONObject(s);
 
-			String streamName = json.getString("stream");
-			String className = json.getString("class");
+            String streamName = json.getString("stream");
+            String className = json.getString("class");
 
-			Class<?> clazz;
-			try {
-				clazz = Class.forName(className);
-			} catch (ClassNotFoundException e) {
-				throw new ObjectBuilder.Exception(
-						"bad class name for json-encoded object: " + className,
-						e);
-			}
+            Class<?> clazz;
+            try {
+                clazz = Class.forName(className);
+            } catch (ClassNotFoundException e) {
+                throw new ObjectBuilder.Exception("bad class name for json-encoded object: "
+                                                          + className,
+                                                  e);
+            }
 
-			String[] keyNames = null;
-			JSONArray keyArray = json.optJSONArray("keys");
-			if (keyArray != null) {
-				keyNames = new String[keyArray.length()];
-				for (int i = 0; i < keyNames.length; ++i) {
-					keyNames[i] = keyArray.optString(i);
-				}
-			}
+            String[] keyNames = null;
+            JSONArray keyArray = json.optJSONArray("keys");
+            if (keyArray != null) {
+                keyNames = new String[keyArray.length()];
+                for (int i = 0; i < keyNames.length; ++i) {
+                    keyNames[i] = keyArray.optString(i);
+                }
+            }
 
-			String jevent = json.getString("object");
+            String jevent = json.getString("object");
 
-			Object obj = GsonUtil.get().fromJson(jevent, clazz);
+            Object obj = GsonUtil.get().fromJson(jevent, clazz);
 
-			return new EventWrapper(streamName, keyNames, obj);
+            return new EventWrapper(streamName, keyNames, obj);
 
-		} catch (JSONException e) {
-			logger.error("problem with event JSON", e);
-		} catch (ObjectBuilder.Exception e) {
-			logger.error("failed to build object from JSON", e);
-		}
+        } catch (JSONException e) {
+            logger.error("problem with event JSON", e);
+        } catch (ObjectBuilder.Exception e) {
+            logger.error("failed to build object from JSON", e);
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	@Override
-	public byte[] bytesFromEventWrapper(EventWrapper ew) {
-		JSONObject jevent = new JSONObject();
+    @Override
+    public byte[] bytesFromEventWrapper(EventWrapper ew) {
+        JSONObject jevent = new JSONObject();
 
-		Object obj = ew.getEvent();
+        Object obj = ew.getEvent();
 
-		try {
-			jevent.put("stream", ew.getStreamName());
-			jevent.put("class", obj.getClass().getName());
-			jevent.put("object", GsonUtil.get().toJson(obj));
+        try {
+            jevent.put("stream", ew.getStreamName());
+            jevent.put("class", obj.getClass().getName());
+            jevent.put("object", GsonUtil.get().toJson(obj));
 
-			return jevent.toString().getBytes(Charset.forName("UTF8"));
+            return jevent.toString().getBytes(Charset.forName("UTF8"));
 
-		} catch (JSONException e) {
-			logger.error("exception while converting event wrapper to bytes.",
-					e);
-			return null;
-		}
-	}
+        } catch (JSONException e) {
+            logger.error("exception while converting event wrapper to bytes.",
+                         e);
+            return null;
+        }
+    }
 }

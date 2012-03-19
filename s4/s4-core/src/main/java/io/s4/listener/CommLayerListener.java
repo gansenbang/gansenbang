@@ -29,8 +29,14 @@ import io.s4.comm.core.ListenerProcess;
 import io.s4.logger.Monitor;
 import io.s4.serialize.SerializerDeserializer;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
+import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -115,9 +121,11 @@ public class CommLayerListener implements EventListener, Runnable {
 					CommLayerState state = (CommLayerState) event.get("state");
 					if (state != null) {
 						if (state == CommLayerState.INITIALIZED) {
-							logger.info("Communication layer initialized: source:" + event.get("source"));
+							logger.info("Communication layer initialized: source:"
+									+ event.get("source"));
 						} else if (state == CommLayerState.BROKEN) {
-							logger.error("Communication layer broken: source:" + event.get("source"));
+							logger.error("Communication layer broken: source:"
+									+ event.get("source"));
 							logger.error("System exiting so that process can restart.");
 							if (monitor != null) {
 								monitor.set(s4_core_exit_ct.toString(), 1,
@@ -145,7 +153,8 @@ public class CommLayerListener implements EventListener, Runnable {
 		t.start();
 
 		if (System.getProperty("DequeuerCount") != null) {
-			dequeuerCount = Integer.parseInt(System.getProperty("DequeuerCount"));
+			dequeuerCount = Integer.parseInt(System
+					.getProperty("DequeuerCount"));
 		}
 
 		System.out.println("dequeuer number: " + dequeuerCount);
@@ -157,6 +166,37 @@ public class CommLayerListener implements EventListener, Runnable {
 		}
 	}
 
+	private static String getPid() {
+		RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();
+		String name = runtime.getName(); // format:"pid@hostname"
+		return name.substring(0, name.indexOf("@"));
+
+	}
+
+	
+
+	public static String GetHostAddress() throws UnknownHostException, SocketException {
+		Enumeration allNetInterfaces;
+		InetAddress ip = null;
+		allNetInterfaces = NetworkInterface.getNetworkInterfaces();
+		while (allNetInterfaces.hasMoreElements()) {
+			NetworkInterface netInterface = (NetworkInterface) allNetInterfaces.nextElement();
+			String niName = netInterface.getName();
+			if(!niName.equals("eth0") && !niName.equals("wlan0"))
+				continue;
+			else {
+				Enumeration addresses = netInterface.getInetAddresses();
+				while (addresses.hasMoreElements()) {
+					ip = (InetAddress) addresses.nextElement();
+					if (ip != null && ip instanceof Inet4Address) {
+						break;
+					}
+				}
+			}
+		}
+		return (ip != null ? ip.getHostAddress() : InetAddress.getLocalHost().getHostAddress());
+	}
+	
 	// This is the actual raw listener, which simply listens for messages on the
 	// socket
 	public void run() {
@@ -168,11 +208,18 @@ public class CommLayerListener implements EventListener, Runnable {
 				map.put("ListenerId", InetAddress.getLocalHost().getHostName()
 						+ "_" + System.getProperty("pid") + "_"
 						+ Thread.currentThread().getId());
-				map.put("address", InetAddress.getLocalHost().getHostAddress());
+				// warning
+				map.put("address", GetHostAddress());
+				map.put("PID", getPid());
+
 			} catch (UnknownHostException e) {
 				e.printStackTrace();
 				throw new RuntimeException(e);
+			} catch (SocketException e) {
+				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
+			
 			logger.info("Waiting to acquire task");
 			listenerConfig = process.acquireTaskAndCreateListener(map);
 			logger.info("acquired task with config:" + listenerConfig);

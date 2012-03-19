@@ -119,9 +119,14 @@
     <property name="monitor" ref="monitor"/>
   </bean>
 
+  <!--
   <bean id="monitor" class="io.s4.logger.Log4jMonitor" lazy-init="true" init-method="init">
     <property name="flushInterval" value="30"/>
     <property name="loggerName" value="monitor"/>
+  </bean>
+  -->
+  <bean id="monitor" class="io.s4.logger.ThriftMonitor" lazy-init="true" init-method="init">
+    <property name="connectionPort" value="7791"/>
   </bean>
 
   <bean id="watcher" class="io.s4.util.Watcher" init-method="init" lazy-init="true">

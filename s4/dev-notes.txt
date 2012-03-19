@@ -1,7 +1,5 @@
 ### Run client examples.
 
-# lalala
-
 ## Injecting Events with a Perl Client
 
 # Create a directory for all the s4 project repositories.
@@ -13,7 +11,7 @@ git clone git@github.com:s4/s4.git
 
 # Build it!
 cd s4
-./gradlew clean allImage
+gradlew clean allImage
 
 # Create some environment variables. 
 export S4_IMAGE=`pwd`'/build/s4-image'

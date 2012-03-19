@@ -23,12 +23,10 @@ import io.s4.util.clock.Clock;
 import io.s4.util.clock.EventClock;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -46,6 +44,7 @@ public class MainApp {
     private static String appsHome = "../s4-apps";
     private static String extsHome = "../s4-exts";
 
+    
     public static void main(String args[]) throws Exception {
         Options options = new Options();
 
@@ -93,7 +92,7 @@ public class MainApp {
         } catch (ParseException pe) {
             System.err.println(pe.getLocalizedMessage());
             System.exit(1);
-        			}
+        }
 
         int instanceId = -1;
         if (commandLine.hasOption("i")) {
@@ -103,59 +102,59 @@ public class MainApp {
             } catch (NumberFormatException nfe) {
                 System.err.println("Bad instance id: %s" + instanceIdStr);
                 System.exit(1);
-            					}
-        			}
+            }
+        }
 
         if (commandLine.hasOption("c")) {
             coreHome = commandLine.getOptionValue("c");
-        			}
+        }
 
         if (commandLine.hasOption("a")) {
             appsHome = commandLine.getOptionValue("a");
-        			}
+        }
         
         if (commandLine.hasOption("d")) {
             clockType = commandLine.getOptionValue("d");
-        			}
+        }
 
         if (commandLine.hasOption("e")) {
             extsHome = commandLine.getOptionValue("e");
-        			}
+        }
 
         String configType = "typical";
         if (commandLine.hasOption("t")) {
             configType = commandLine.getOptionValue("t");
-        			}
+        }
         
         long seedTime = 0;
         if (commandLine.hasOption("s")) {
             seedTime = Long.parseLong(commandLine.getOptionValue("s"));
-        			}
+        }
 
         File coreHomeFile = new File(coreHome);
         if (!coreHomeFile.isDirectory()) {
             System.err.println("Bad core home: " + coreHome);
             System.exit(1);
-        			}
+        }
 
         File appsHomeFile = new File(appsHome);
         if (!appsHomeFile.isDirectory()) {
             System.err.println("Bad applications home: " + appsHome);
             System.exit(1);
-        			}
+        }
 
         if (instanceId > -1) {
             System.setProperty("instanceId", "" + instanceId);
         } else {
             System.setProperty("instanceId", "" + S4Util.getPID());
-        			}
+        }
 
         List loArgs = commandLine.getArgList();
 
         if (loArgs.size() < 1) {
             // System.err.println("No bean configuration file specified");
             // System.exit(1);
-        			}
+        }
 
         // String s4ConfigXml = (String) loArgs.get(0);
         // System.out.println("s4ConfigXml is " + s4ConfigXml);
@@ -167,7 +166,7 @@ public class MainApp {
         } else {
             System.err.println("Unable to find s4-core.properties. It must be available in classpath");
             System.exit(1);
-        			}
+        }
 
         ApplicationContext coreContext = null;
         String configBase = coreHome + File.separatorChar + "conf"
@@ -187,7 +186,7 @@ public class MainApp {
             System.err.printf("S4 core config file %s does not exist\n",
                     configPath);
             System.exit(1);
-        			}
+        }
 		
         coreConfigUrls.add(configPath);
         String[] coreConfigFiles = new String[coreConfigUrls.size()];
@@ -196,7 +195,7 @@ public class MainApp {
         String[] coreConfigFileUrls = new String[coreConfigFiles.length];
         for (int i = 0; i < coreConfigFiles.length; i++) {
             coreConfigFileUrls[i] = "file:" + coreConfigFiles[i];
-        			}
+        }
 
         coreContext = new FileSystemXmlApplicationContext(coreConfigFileUrls, coreContext);
         ApplicationContext context = coreContext;        
@@ -206,7 +205,7 @@ public class MainApp {
             EventClock s4EventClock = (EventClock)clock;
             s4EventClock.updateTime(seedTime);
             System.out.println("Intializing event clock time with seed time " + s4EventClock.getCurrentTime());
-        			}
+        }
         
         PEContainer peContainer = (PEContainer) context.getBean("peContainer");
 
@@ -220,10 +219,10 @@ public class MainApp {
             String[] configFileUrls = new String[configFileNames.length];
             for (int i = 0; i < configFileNames.length; i++) {
                 configFileUrls[i] = "file:" + configFileNames[i];
-            					}
+            }
             context = new FileSystemXmlApplicationContext(configFileUrls,
                                                           context);
-        			}
+        }
 
         // load application modules
         configFileNames = getModuleConfigFiles(appsHome, prop);
@@ -231,7 +230,7 @@ public class MainApp {
             String[] configFileUrls = new String[configFileNames.length];
             for (int i = 0; i < configFileNames.length; i++) {
                 configFileUrls[i] = "file:" + configFileNames[i];
-            					}
+            }
             context = new FileSystemXmlApplicationContext(configFileUrls,
                                                           context);
             // attach any beans that implement ProcessingElement to the PE
@@ -244,14 +243,15 @@ public class MainApp {
                 // if the application did not specify an id, use the Spring bean name
                 if (bean.getId() == null) {
                     bean.setId(processingElementBeanName);
-                							}
+                }
                 System.out.println("Adding processing element with bean name "
                         + processingElementBeanName + ", id "
                         + ((AbstractPE) bean).getId());
                 peContainer.addProcessor((AbstractPE) bean);
-            					}
-        				}  
-    			}
+            }
+        }
+        System.out.println("start finished");
+    }
 
     /**
      * 

@@ -173,7 +173,8 @@ public class CommLayerEmitter implements EventEmitter, Runnable {
 			}
 			logger.info("Creating sender process with " + listenerConfig);
 
-			String destinationAppName = (listenerAppName != null ? listenerAppName : listener.getAppName());
+			String destinationAppName = (listenerAppName != null ? listenerAppName
+					: listener.getAppName());
 
 			sender = new SenderProcess(listener.getClusterManagerAddress(),
 					listener.getAppName(), destinationAppName);
