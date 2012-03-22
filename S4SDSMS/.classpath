@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="src" path="src/main/resources"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER" exported="true"/>
+	<classpathentry kind="lib" path="/home/phoenixcw/cloud/s4/build/s4-image/s4-driver/lib/s4-driver-0.4.0-SNAPSHOT.jar" exported="true"/>
+	<classpathentry kind="lib" path="/home/phoenixcw/cloud/s4/build/s4-image/s4-core/lib/commons-cli-1.2.jar" exported="true"/>
+	<classpathentry kind="lib" path="/home/phoenixcw/.gradle/cache/commons-beanutils/commons-beanutils-core/jars/commons-beanutils-core-1.8.0.jar" exported="true"/>
+	<classpathentry kind="lib" path="/home/phoenixcw/.gradle/cache/commons-configuration/commons-configuration/jars/commons-configuration-1.6.jar" exported="true"/>
+	<classpathentry kind="lib" path="/home/phoenixcw/.gradle/cache/commons-lang/commons-lang/jars/commons-lang-2.4.jar" exported="true"/>
+	<classpathentry kind="lib" path="/home/phoenixcw/cloud/s4/build/s4-image/s4-core/lib/s4-core-0.4.0-SNAPSHOT.jar" exported="true"/>
+	<classpathentry kind="lib" path="/home/phoenixcw/cloud/s4/build/s4-image/s4-core/lib/json-20090211.jar" exported="true"/>
+	<classpathentry kind="lib" path="/home/phoenixcw/.gradle/cache/commons-httpclient/commons-httpclient/jars/commons-httpclient-3.1.jar" exported="true"/>
+	<classpathentry kind="lib" path="/home/phoenixcw/.gradle/cache/commons-collections/commons-collections/jars/commons-collections-3.2.1.jar" exported="true"/>
+	<classpathentry kind="lib" path="/home/phoenixcw/.gradle/cache/commons-io/commons-io/jars/commons-io-2.0.1.jar" exported="true"/>
+	<classpathentry kind="lib" path="/home/phoenixcw/cloud/s4/build/s4-image/s4-core/lib/activation-1.1.jar" exported="true"/>
+	<classpathentry kind="lib" path="/home/phoenixcw/cloud/s4/build/s4-image/s4-core/lib/gson-1.6.jar" exported="true"/>
+	<classpathentry kind="lib" path="/home/phoenixcw/.gradle/cache/junit/junit/jars/junit-4.4.jar" exported="true"/>
+	<classpathentry kind="lib" path="/home/phoenixcw/.gradle/cache/commons-beanutils/commons-beanutils/jars/commons-beanutils-1.7.0.jar" exported="true"/>
+	<classpathentry kind="lib" path="/home/phoenixcw/cloud/s4/build/s4-image/s4-core/lib/commons-logging-1.1.1.jar" exported="true"/>
+	<classpathentry kind="lib" path="/home/phoenixcw/cloud/s4/build/s4-image/s4-core/lib/log4j-1.2.15.jar" exported="true"/>
+	<classpathentry kind="lib" path="/home/phoenixcw/cloud/s4/build/s4-image/s4-core/lib/commons-codec-1.4.jar" exported="true"/>
+	<classpathentry kind="lib" path="/home/phoenixcw/.gradle/cache/commons-digester/commons-digester/jars/commons-digester-1.8.jar" exported="true"/>
+	<classpathentry kind="lib" path="/home/phoenixcw/cloud/s4/build/s4-image/s4-core/lib/mail-1.4.jar" exported="true"/>
+</classpath>

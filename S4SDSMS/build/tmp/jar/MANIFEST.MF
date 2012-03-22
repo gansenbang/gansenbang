@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+provider: gradle
+Implementation-Url: http://s4.scnu.edu.cn
+Implementation-Version: 0.1.0
+Implementation-Vendor: The S4-SimpleDSMS Project
+Implementation-Vendor-Id: scnu.edu.cn
+

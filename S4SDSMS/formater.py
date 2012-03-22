@@ -9,6 +9,7 @@ s4_image = os.getenv('S4_IMAGE')
 def makeJSON(s):
     items = s.split(',')
     l = []
+    l.append('"_index":0')
     l.append('"zone":' + items[0])
     l.append('"rateVersion":' + items[1])
     l.append('"importSection":' + items[2])
