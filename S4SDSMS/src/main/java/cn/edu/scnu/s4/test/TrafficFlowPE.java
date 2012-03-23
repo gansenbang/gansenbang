@@ -23,6 +23,7 @@ public class TrafficFlowPE extends AbstractPE {
 		System.out.println("    carType: " + trafficFlow.getCarType());
 		System.out.println("    figure: " + trafficFlow.getFigure());
 		System.out.println("    mileage: " + trafficFlow.getMileage());
+		//System.out.println("Received " + trafficFlow.toString());
     }
     
     @Override

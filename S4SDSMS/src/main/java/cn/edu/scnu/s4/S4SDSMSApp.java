@@ -45,7 +45,7 @@ public class S4SDSMSApp {
 		String hostName = "localhost";
         
         int port = 2334;
-        String streamName = "Sell";
+        String streamName = "TrafficFlow";
         String clazz = "cn.edu.scnu.s4.test.TrafficFlow";
 
         Driver d = new Driver(hostName, port);
@@ -63,15 +63,16 @@ public class S4SDSMSApp {
             }
             
             FileInputStream fis = null;
+            
     		try {
-    			fis = new FileInputStream("/home/phoenixcw/cloud/s4/build/s4-image/s4-example-testinput/rate.jin");
+    			fis = new FileInputStream("/home/user/s4/build/s4-image/s4-example-testinput/rate.jin");
     		} catch (FileNotFoundException e) {
     			// TODO Auto-generated catch block
     			e.printStackTrace();
     		}
     		
-            //inputReader = new InputStreamReader(fis);
-    		inputReader = new InputStreamReader(System.in);
+            inputReader = new InputStreamReader(fis);
+    		//inputReader = new InputStreamReader(System.in);
             br = new BufferedReader(inputReader);
 
             for (String inputLine = null; (inputLine = br.readLine()) != null;) {
