@@ -11,10 +11,13 @@ import java.util.Map;
 import org.apache.s4.client.Driver;
 import org.apache.s4.client.Message;
 
+/**
+ * @author ChunweiXu
+ *
+ */
 public class S4SDSMSApp {
 
 	/**
-	 * @author ChunweiXu
 	 * @param args
 	 */
 	public static void main(String[] args) {
