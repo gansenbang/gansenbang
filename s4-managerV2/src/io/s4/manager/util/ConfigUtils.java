@@ -17,15 +17,14 @@ import io.s4.manager.util.ConfigParser.ClusterNode;
 
 public class ConfigUtils {
 	public static List<Map<String, String>> readConfig(String configFilename,
-			String clusterName, ClusterType clusterType, boolean isStatic) {
+			String clusterName, ClusterType clusterType, boolean isStatic) throws Exception {
 		ConfigParser parser = new ConfigParser();
 		ConfigParser.Config config = parser.parse(configFilename);
 
 		// find the requested cluster
 		Cluster cluster = null;
 		for (Cluster checkCluster : config.getClusters()) {
-			if (checkCluster.getName().equals(clusterName)
-					&& checkCluster.getType().equals(clusterType)) {
+			if (checkCluster.getName().equals(clusterName) && checkCluster.getType().equals(clusterType)) {
 				cluster = checkCluster;
 				break;
 			}
@@ -57,9 +56,6 @@ public class ConfigUtils {
 			}
 			nodeInfo.put("mode", cluster.getMode());
 			nodeInfo.put("ID", node.getTaskId());
-			nodeInfo.put("user", node.getUser());
-			nodeInfo.put("pass", node.getPass());
-			nodeInfo.put("s4image", node.getS4image());
 			if(node.getMachineName().equals("localhost")){
 				try {
 					nodeInfo.put("machine", GetHostAddress());

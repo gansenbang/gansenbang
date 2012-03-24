@@ -32,12 +32,12 @@ public class MachineInfo {
 	public String pass;
 	public String s4image;
 	public String znode;
-	
 	@Override
 	public String toString() {
-		return "MachineInfo {status=" + status + ", host=" + host
-				+ ", port=" + port + ", pass=" + pass + ", s4image="
-				+ s4image + ", znode=" + znode + "}";
+		return "MachineInfo [status=" + status + ", host=" + host + ", user="
+				+ user + ", port=" + port + ", pass=" + pass + ", s4image="
+				+ s4image + ", znode=" + znode + "]";
 	}
+	
 	
 }

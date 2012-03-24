@@ -46,10 +46,12 @@ public class ManagerServerImpl implements ManagerServer.Iface{
 		boolean isSucc = dm.ReceiveXMLConfig(xmlfile, clustername);
 		if(isSucc){
 			ServerManager sm = dm.GetCluster(clustername);
-			String ClusterConfig = Constant.CONF_PATH + clustername + "/" + Constant.CLUSTER_FILE; 
+			String ClusterConfig = Constant.CONF_PATH + "/" + clustername + "/" + Constant.CLUSTER_FILE; 
 			try {
-				sm.TaskSetup(ClusterConfig, clean, s4clustersname);
+				if(sm != null)
+					sm.TaskSetup(ClusterConfig, clean, s4clustersname);
 			} catch (Exception e) {
+				e.printStackTrace();
 				return false;
 			}
 		} else 
@@ -110,6 +112,10 @@ public class ManagerServerImpl implements ManagerServer.Iface{
 		ServerManager sm = dm.GetCluster(clustername);
 		if(sm == null) return false;
 		return sm.RecoveryClientAdapter(s4clustername, listenappname, hostport);
+	}
+	
+	public static void main(String[] args){
+		
 	}
 	
 }

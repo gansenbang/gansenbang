@@ -21,8 +21,7 @@ public class testtasksetup {
 	}
 	
 	public static Config parseXML(){
-		ConfigParser parser = new ConfigParser();
-		Config config = parser.parse(setupxml);
+		Config config = new Config();
 		return config;
 	}
 }

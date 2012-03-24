@@ -25,7 +25,7 @@ public class ConfigParser {
 	public ConfigParser() {
 	}
 
-	public Config parse(String configFilename) {
+	public Config parse(String configFilename) throws Exception {
 		Config config = null;
 
 		Document document = createDocument(configFilename);
@@ -215,7 +215,7 @@ public class ConfigParser {
 		return new ClusterNode(partition, port, machineName, taskId, user, pass, s4image);
 	}
 
-	public static Document createDocument(String configFilename) {
+	public static Document createDocument(String configFilename) throws Exception {
 		try {
 			Document document;
 			// Get a JAXP parser factory object
@@ -247,12 +247,12 @@ public class ConfigParser {
 			// required.
 			InputStream is = getResourceStream(configFilename);
 			if (is == null) {
-				throw new RuntimeException("Unable to find config file:"+ configFilename);
+				throw new Exception("Unable to find config file:"+ configFilename);
 			}
 			document = parser.parse(is);
 			return document;
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			throw new Exception(e);
 		}
 	}
 
@@ -272,9 +272,7 @@ public class ConfigParser {
 	}
 
 	public static void main(String[] args) {
-		ConfigParser parser = new ConfigParser();
-		Config config = parser.parse(args[0]);
-		System.out.println(config);
+		
 	}
 
 	private static InputStream getResourceStream(String configfile) {

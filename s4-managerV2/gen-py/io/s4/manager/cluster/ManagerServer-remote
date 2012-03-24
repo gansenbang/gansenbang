@@ -27,7 +27,7 @@ if len(sys.argv) <= 1 or sys.argv[1] == '--help':
   print '  bool RemoveCluster(string clustername)'
   print '   GetAllMachinesList()'
   print '   GetAllClustersList()'
-  print '  bool CommitS4ClusterXMLConfig(string xmlfile, string clustername,  s4clustersname)'
+  print '  bool CommitS4ClusterXMLConfig(string xmlfile, string clustername, bool clean,  s4clustersname)'
   print '   GetS4ClusterMessage(string clustername)'
   print '  bool StartS4ServerCluster(string clustername, string s4clustername, string adapterclustername)'
   print '  bool StartClientAdapterCluster(string clustername, string s4clustername, string listenappname)'
@@ -111,10 +111,10 @@ elif cmd == 'GetAllClustersList':
   pp.pprint(client.GetAllClustersList())
 
 elif cmd == 'CommitS4ClusterXMLConfig':
-  if len(args) != 3:
-    print 'CommitS4ClusterXMLConfig requires 3 args'
+  if len(args) != 4:
+    print 'CommitS4ClusterXMLConfig requires 4 args'
     sys.exit(1)
-  pp.pprint(client.CommitS4ClusterXMLConfig(args[0],args[1],eval(args[2]),))
+  pp.pprint(client.CommitS4ClusterXMLConfig(args[0],args[1],eval(args[2]),eval(args[3]),))
 
 elif cmd == 'GetS4ClusterMessage':
   if len(args) != 1:

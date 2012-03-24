@@ -18,7 +18,7 @@ service ManagerServer{
 	list<Machine> GetAllMachinesList(),
 	list<Cluster> GetAllClustersList(),
 	/*xmlfile 配置文件，String*/
-	bool CommitS4ClusterXMLConfig(1:string xmlfile,2:string clustername,3:list<string> s4clustersname),
+	bool CommitS4ClusterXMLConfig(1:string xmlfile,2:string clustername,3:bool clean,4:list<string> s4clustersname),
 
 	map<string,map<string,string>> GetS4ClusterMessage(1:string clustername),
 	bool StartS4ServerCluster(1:string clustername,2:string s4clustername,3:string adapterclustername),

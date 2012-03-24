@@ -2,6 +2,7 @@ package io.s4.manager.core;
 
 import io.s4.manager.persist.MachineInfo;
 import io.s4.manager.util.ConfigParser.Cluster;
+import io.s4.manager.util.ConfigParser.ClusterNode;
 import io.s4.manager.util.ConfigParser.Config;
 import io.s4.manager.util.ConfigParser.Cluster.ClusterType;
 import io.s4.manager.util.ConfigParser;
@@ -34,76 +35,90 @@ public class ServerManager extends DefaultWatcher {
 		this.zkAddress = zkAddress;
 	}
 
-	public void TaskSetup(String ClusterConfig, boolean clean, List<String> s4clustersname) throws Exception{
-		if(clean)
+	public void TaskSetup(String ClusterConfig, boolean clean,
+			List<String> s4clustersname) throws Exception {
+		if (clean)
 			TaskSetupAll(ClusterConfig);
 		else
 			TaskSetupWithName(ClusterConfig, s4clustersname);
 	}
-	
-	private void TaskSetupWithName(String ClusterConfig, List<String> s4clustersname) throws Exception {
+
+	private void TaskSetupWithName(String ClusterConfig,
+			List<String> s4clustersname) throws Exception {
 		synchronized (lock) {
 			ConfigParser parser = new ConfigParser();
 			Config config = parser.parse(ClusterConfig);
 			this.nodecount = 0;
 			for (Cluster cluster : config.getClusters()) {
-				if(s4clustersname != null){
-					for(String s4cluster : s4clustersname){
-						if(cluster.getName().equals(s4cluster)){
+				if (s4clustersname != null) {
+					for (String s4cluster : s4clustersname) {
+						if (cluster.getName().equals(s4cluster)) {
 							SetupS4Cluster(cluster, config.getVersion());
 						}
 					}
-				} 
+				}
 			}
 		}
 	}
-	
-	private void TaskSetupAll(String ClusterConfig) throws Exception{
-		synchronized(lock){
+
+	private void TaskSetupAll(String ClusterConfig) throws Exception {
+		synchronized (lock) {
 			ConfigParser parser = new ConfigParser();
 			Config config = parser.parse(ClusterConfig);
 			this.nodecount = 0;
 			S4Cluster.clear();
-			for(Cluster cluster : config.getClusters()){
+			for (Cluster cluster : config.getClusters()) {
 				SetupS4Cluster(cluster, config.getVersion());
 			}
 		}
 	}
-	
-	private void SetupS4Cluster(Cluster cluster, String version) throws Exception{
+
+	private void SetupS4Cluster(Cluster cluster, String version)
+			throws Exception {
 		String Name = cluster.getName();
 		ClusterType Type = cluster.getType();
 		String Mode = cluster.getMode();
 		ClusterStatus cs = new ClusterStatus(Name, Type, Mode);
+		List<ClusterNode> nodelist = cluster.getNodes();
+
+		for (ClusterNode node : nodelist) {
+			String hostport = node.getMachineName() + ":" + node.getPort();
+			if (this.MachineMap.get(hostport) != null)
+				cs.getMahcineMap().put(hostport, this.MachineMap.get(hostport));
+		}
+
 		S4Cluster.put(Name, cs);
 		TaskSetupApp.processCluster(true, zkAddress, cluster, version);
 	}
-	
+
 	public Map<String, MachineInfo> getMachineMap() {
 		return MachineMap;
 	}
 
-	public int GetNodeCount(){
-  	return nodecount;
+	public int GetNodeCount() {
+		return nodecount;
 	}
-	
+
 	public Map<String, Map<String, String>> GetClusterMessage() {
 		try {
 			Set<String> clusterset = this.S4Cluster.keySet();
-			for(String s4cluster : clusterset){
+			for (String s4cluster : clusterset) {
 				ClusterStatus cs = this.S4Cluster.get(s4cluster);
 				readProcessConfig(cs, cs.getName(), cs.getType());
 			}
 			ClusterMessage.clear();
-			
-			for(String s4cluster : clusterset){
+
+			for (String s4cluster : clusterset) {
 				Map<String, String> map = new HashMap<String, String>();
 				ClusterStatus cs = this.S4Cluster.get(s4cluster);
 				Map<String, MachineInfo> minfomap = cs.getMahcineMap();
 				Set<String> hostportset = minfomap.keySet();
-				for(String hostport : hostportset){
-					map.put(hostport, minfomap.get(hostport).znode);
+
+				for (String hostport : hostportset) {
+					String znode = minfomap.get(hostport).znode;
+					map.put(hostport, znode == null ? "null" : znode);
 				}
+
 				this.ClusterMessage.put(s4cluster, map);
 			}
 		} catch (KeeperException e) {
@@ -111,25 +126,30 @@ public class ServerManager extends DefaultWatcher {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		return null;
+		return this.ClusterMessage;
 	}
 
-	private void readProcessConfig(ClusterStatus cs, String clustername, ClusterType clustertype) throws KeeperException, InterruptedException{
-		String pZnode = "/" + clustername + "/" + clustertype.toString() + "/process";
+	private void readProcessConfig(ClusterStatus cs, String clustername,
+			ClusterType clustertype) throws KeeperException,
+			InterruptedException {
+		String pZnode = "/" + clustername + "/" + clustertype.toString()
+				+ "/process";
 		Stat pExists = zk.exists(pZnode, false);
-		if(pExists != null) {
+		if (pExists != null) {
 			List<String> pZnodeChildren = zk.getChildren(pZnode, true);
-			for(String node : pZnodeChildren){
+			for (String node : pZnodeChildren) {
 				String nodeFullPath = pZnode + "/" + node;
 				Stat pNodeStat = zk.exists(nodeFullPath, false);
-				if(pNodeStat != null){
+				if (pNodeStat != null) {
 					byte[] bytes = zk.getData(nodeFullPath, false, pNodeStat);
-					Map<String, Object> map = (Map<String, Object>) JSONUtil.getMapFromJson(new String(bytes));
-					String address = (String)map.get("address");
-					String port = (String)map.get("port");
-					if(cs != null){
-						MachineInfo minfo = cs.getMahcineMap().get(address + ":" + port);
-						if(minfo != null){
+					Map<String, Object> map = (Map<String, Object>) JSONUtil
+							.getMapFromJson(new String(bytes));
+					String address = (String) map.get("address");
+					String port = (String) map.get("port");
+					if (cs != null) {
+						MachineInfo minfo = cs.getMahcineMap().get(
+								address + ":" + port);
+						if (minfo != null) {
 							minfo.znode = nodeFullPath;
 							cs.getMahcineMap().put(address + ":" + port, minfo);
 						}
@@ -144,9 +164,10 @@ public class ServerManager extends DefaultWatcher {
 		super.process(event);
 		if (event.getType() == EventType.NodeChildrenChanged) {
 			Set<String> s4clusterset = this.S4Cluster.keySet();
-			for(String s4cluster : s4clusterset){
+			for (String s4cluster : s4clusterset) {
 				ClusterStatus cs = this.S4Cluster.get(s4cluster);
-				String pZnode = "/" + cs.getName() + "/" + cs.getType().toString() + "/process";
+				String pZnode = "/" + cs.getName() + "/"
+						+ cs.getType().toString() + "/process";
 				try {
 					zk.exists(pZnode, true);
 				} catch (KeeperException e) {
@@ -158,54 +179,58 @@ public class ServerManager extends DefaultWatcher {
 		}
 	}
 
-	public boolean RecoveryS4Server(String ClusterName, String AdapterClusterName, String hostport){
-		String command = this.makeStartS4Command(ClusterName, AdapterClusterName);
+	public boolean RecoveryS4Server(String ClusterName,
+			String AdapterClusterName, String hostport) {
+		String command = this.makeStartS4Command(ClusterName,
+				AdapterClusterName);
 		ClusterStatus cs = this.S4Cluster.get(ClusterName);
-		if(cs != null){
+		if (cs != null) {
 			SSHWrapper sw = new SSHWrapper();
 			try {
 				MachineInfo minfo = cs.getMahcineMap().get(hostport);
-				if(minfo != null){
+				if (minfo != null) {
 					sw.Authenticated(minfo.host, minfo.user, minfo.pass);
 					sw.RunRemoteCommand(command);
+					sw.close();
 				}
 			} catch (IOException e) {
 				return false;
-			} finally {
-				sw.close();
 			}
 		}
 		return true;
 	}
-	
-	public boolean RecoveryClientAdapter(String ClusterName, String ListenAppName, String hostport){
-		String command = this.makeRunClientAdapterCommand(ClusterName, ListenAppName);
+
+	public boolean RecoveryClientAdapter(String ClusterName,
+			String ListenAppName, String hostport) {
+		String command = this.makeRunClientAdapterCommand(ClusterName,
+				ListenAppName);
 		ClusterStatus cs = this.S4Cluster.get(ClusterName);
-		if(cs != null){
+		if (cs != null) {
 			SSHWrapper sw = new SSHWrapper();
 			try {
 				MachineInfo minfo = cs.getMahcineMap().get(hostport);
-				if(minfo != null){
+				if (minfo != null) {
 					sw.Authenticated(minfo.host, minfo.user, minfo.pass);
 					sw.RunRemoteCommand(command);
+					sw.close();
 				}
 			} catch (IOException e) {
 				return false;
-			} finally {
-				sw.close();
 			}
 		}
 		return true;
 	}
-	
-	public boolean StartClientAdapterCluster(String ClusterName, String ListenAppName) {
+
+	public boolean StartClientAdapterCluster(String ClusterName,
+			String ListenAppName) {
 		if (isNullString(ClusterName) || isNullString(ListenAppName))
 			return false;
 		String command = makeRunClientAdapterCommand(ClusterName, ListenAppName);
 		return StartS4Cluster(ClusterName, command);
 	}
 
-	private String makeRunClientAdapterCommand(String ClusterName, String ListenAppName) {
+	private String makeRunClientAdapterCommand(String ClusterName,
+			String ListenAppName) {
 		String command = "run-client-adapter.sh -s " + ClusterName + " -g s4 "
 				+ ListenAppName
 				+ " -d $S4_IMAGE/s4-core/conf/dynamic/client-stub-conf.xml "
@@ -230,51 +255,56 @@ public class ServerManager extends DefaultWatcher {
 
 	private boolean isNullString(String target) {
 		if (target == null || target.equals(""))
-			return false;
-		return true;
+			return true;
+		return false;
 	}
 
-	private synchronized boolean StartS4Cluster(String ClusterName, String Command) {
+	private synchronized boolean StartS4Cluster(String ClusterName,
+			String Command) {
 		SSHWrapper sw = new SSHWrapper();
 		try {
 			ClusterStatus cs = this.S4Cluster.get(ClusterName);
-			if(cs != null){
+			if (cs != null) {
 				Set<String> s4cluset = cs.getMahcineMap().keySet();
-				for(String s4clustername : s4cluset){
-					MachineInfo minfo = cs.getMahcineMap().get(s4clustername);
-					sw.Authenticated(minfo.host, minfo.user, minfo.pass);
-					sw.RunRemoteCommand(Command);
+				if (s4cluset != null) {
+					for (String s4clustername : s4cluset) {
+						MachineInfo minfo = cs.getMahcineMap().get(
+								s4clustername);
+						sw.Authenticated(minfo.host, minfo.user, minfo.pass);
+						sw.RunRemoteCommand(minfo.s4image + Command);
+						sw.close();
+					}
 				}
 			}
 		} catch (IOException e) {
+			e.printStackTrace();
 			return false;
-		} finally {
-			sw.close();
 		}
 		return true;
 	}
-	
-	public boolean RemoveAllS4Cluster(){
+
+	public boolean RemoveAllS4Cluster() {
 		Set<String> s4cluset = this.S4Cluster.keySet();
-		for(String s4clustername : s4cluset){
+		for (String s4clustername : s4cluset) {
 			ClusterStatus cs = this.S4Cluster.get(s4clustername);
 			boolean isSucc = RemoveS4Cluster(cs);
-			if(!isSucc)
+			if (!isSucc)
 				return false;
 		}
 		return true;
 	}
-	
-	public boolean RemoveS4Cluster(String s4clustername){
+
+	public boolean RemoveS4Cluster(String s4clustername) {
 		ClusterStatus cs = this.S4Cluster.get(s4clustername);
-		if(cs != null)
+		if (cs != null) {
 			return RemoveS4Cluster(cs);
-		else
-			return false;
+		}
+		return false;
 	}
-	
+
 	public boolean RemoveS4Cluster(ClusterStatus cs) {
-		String processNode = "/" + cs.getName() + "/" + cs.getType().toString() + "/process";
+		String processNode = "/" + cs.getName() + "/" + cs.getType().toString()
+				+ "/process";
 		SSHWrapper sw = new SSHWrapper();
 		try {
 			Stat pNodeStat = zk.exists(processNode, false);
@@ -284,7 +314,8 @@ public class ServerManager extends DefaultWatcher {
 					String nodefullpath = processNode + "/" + nodepath;
 					Stat pTaskStat = zk.exists(nodefullpath, false);
 					if (pTaskStat != null) {
-						byte[] bytes = zk.getData(nodefullpath, false, pTaskStat);
+						byte[] bytes = zk.getData(nodefullpath, false,
+								pTaskStat);
 						Map<String, Object> map = (Map<String, Object>) JSONUtil.getMapFromJson(new String(bytes));
 						String address = (String) map.get("address");
 						String port = (String) map.get("port");
@@ -294,22 +325,25 @@ public class ServerManager extends DefaultWatcher {
 						String pass = minfo.pass;
 						sw.Authenticated(address, user, pass);
 						sw.RunRemoteCommand("kill " + pid);
+						sw.close();
+						System.out.println(minfo);
+						System.out.println("PID=" + pid);
 					}
 				}
 			}
-
 		} catch (KeeperException e) {
+			e.printStackTrace();
 			return false;
 		} catch (InterruptedException e) {
+			e.printStackTrace();
 			return false;
 		} catch (IOException e) {
+			e.printStackTrace();
 			return false;
-		} finally {
-			sw.close();
 		}
 		return true;
 	}
-	
+
 	private class ClusterStatus {
 		private String name;
 		private ClusterType type;
@@ -351,10 +385,14 @@ public class ServerManager extends DefaultWatcher {
 		public void setChangeMode(boolean changeMode) {
 			this.changeMode = changeMode;
 		}
-		
-		public Map<String, MachineInfo> getMahcineMap(){
+
+		public Map<String, MachineInfo> getMahcineMap() {
 			return this.machinemap;
 		}
+	}
+
+	public static void main(String[] args) {
+
 	}
 
 }

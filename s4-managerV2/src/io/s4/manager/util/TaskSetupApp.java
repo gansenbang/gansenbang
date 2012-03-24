@@ -15,7 +15,6 @@
  */
 package io.s4.manager.util;
 
-import io.s4.manager.util.ConfigParser.Cluster.ClusterType;
 import io.s4.manager.util.ConfigUtils;
 import io.s4.manager.util.ConfigParser;
 import io.s4.manager.util.ConfigParser.Cluster;
@@ -78,9 +77,9 @@ public class TaskSetupApp {
 	public static void processCluster(boolean clean, String zkAddress,
 			Cluster cluster, String version) throws Exception {
 		List<Map<String, String>> clusterInfo = ConfigUtils.readConfig(cluster,
-																																												cluster.getName(), 
-																																												cluster.getType(), 
-																																												false);
+																	   cluster.getName(), 
+																	   cluster.getType(), 
+																	   false);
  		ZkTaskSetup zkSetup = new ZkTaskSetup(zkAddress, cluster.getName(), cluster.getType());
 		if (clean) {
 			zkSetup.cleanUp();

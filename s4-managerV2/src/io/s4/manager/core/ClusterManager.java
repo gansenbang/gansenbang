@@ -19,13 +19,12 @@ public class ClusterManager {
 	private TServer server;
 	
 	public final DataManager dm;
-	private final String XMLConfig = "clusters.xml";
 	private final int port;
 	
 	public ClusterManager(){
 		String target = getProperty("PORT");
 		port = target != null ? Integer.valueOf(target) : 10030;
-		dm = new FileDataManager(this.XMLConfig);
+		dm = new FileDataManager(null);
 	}
 	
 	private static String getProperty(String property){
@@ -57,11 +56,7 @@ public class ClusterManager {
 		ClusterManager cm = new ClusterManager();
 		try {
 			cm.init();
-			
 			cm.run();
-			/*
-			
-			*/
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

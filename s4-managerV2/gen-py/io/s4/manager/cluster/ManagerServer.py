@@ -40,11 +40,12 @@ class Iface:
   def GetAllClustersList(self, ):
     pass
 
-  def CommitS4ClusterXMLConfig(self, xmlfile, clustername, s4clustersname):
+  def CommitS4ClusterXMLConfig(self, xmlfile, clustername, clean, s4clustersname):
     """
     Parameters:
      - xmlfile
      - clustername
+     - clean
      - s4clustersname
     """
     pass
@@ -231,21 +232,23 @@ class Client(Iface):
       return result.success
     raise TApplicationException(TApplicationException.MISSING_RESULT, "GetAllClustersList failed: unknown result");
 
-  def CommitS4ClusterXMLConfig(self, xmlfile, clustername, s4clustersname):
+  def CommitS4ClusterXMLConfig(self, xmlfile, clustername, clean, s4clustersname):
     """
     Parameters:
      - xmlfile
      - clustername
+     - clean
      - s4clustersname
     """
-    self.send_CommitS4ClusterXMLConfig(xmlfile, clustername, s4clustersname)
+    self.send_CommitS4ClusterXMLConfig(xmlfile, clustername, clean, s4clustersname)
     return self.recv_CommitS4ClusterXMLConfig()
 
-  def send_CommitS4ClusterXMLConfig(self, xmlfile, clustername, s4clustersname):
+  def send_CommitS4ClusterXMLConfig(self, xmlfile, clustername, clean, s4clustersname):
     self._oprot.writeMessageBegin('CommitS4ClusterXMLConfig', TMessageType.CALL, self._seqid)
     args = CommitS4ClusterXMLConfig_args()
     args.xmlfile = xmlfile
     args.clustername = clustername
+    args.clean = clean
     args.s4clustersname = s4clustersname
     args.write(self._oprot)
     self._oprot.writeMessageEnd()
@@ -579,7 +582,7 @@ class Processor(Iface, TProcessor):
     args.read(iprot)
     iprot.readMessageEnd()
     result = CommitS4ClusterXMLConfig_result()
-    result.success = self._handler.CommitS4ClusterXMLConfig(args.xmlfile, args.clustername, args.s4clustersname)
+    result.success = self._handler.CommitS4ClusterXMLConfig(args.xmlfile, args.clustername, args.clean, args.s4clustersname)
     oprot.writeMessageBegin("CommitS4ClusterXMLConfig", TMessageType.REPLY, seqid)
     result.write(oprot)
     oprot.writeMessageEnd()
@@ -1160,6 +1163,7 @@ class CommitS4ClusterXMLConfig_args:
   Attributes:
    - xmlfile
    - clustername
+   - clean
    - s4clustersname
   """
 
@@ -1167,12 +1171,14 @@ class CommitS4ClusterXMLConfig_args:
     None, # 0
     (1, TType.STRING, 'xmlfile', None, None, ), # 1
     (2, TType.STRING, 'clustername', None, None, ), # 2
-    (3, TType.LIST, 's4clustersname', (TType.STRING,None), None, ), # 3
+    (3, TType.BOOL, 'clean', None, None, ), # 3
+    (4, TType.LIST, 's4clustersname', (TType.STRING,None), None, ), # 4
   )
 
-  def __init__(self, xmlfile=None, clustername=None, s4clustersname=None,):
+  def __init__(self, xmlfile=None, clustername=None, clean=None, s4clustersname=None,):
     self.xmlfile = xmlfile
     self.clustername = clustername
+    self.clean = clean
     self.s4clustersname = s4clustersname
 
   def read(self, iprot):
@@ -1195,6 +1201,11 @@ class CommitS4ClusterXMLConfig_args:
         else:
           iprot.skip(ftype)
       elif fid == 3:
+        if ftype == TType.BOOL:
+          self.clean = iprot.readBool();
+        else:
+          iprot.skip(ftype)
+      elif fid == 4:
         if ftype == TType.LIST:
           self.s4clustersname = []
           (_etype24, _size21) = iprot.readListBegin()
@@ -1222,8 +1233,12 @@ class CommitS4ClusterXMLConfig_args:
       oprot.writeFieldBegin('clustername', TType.STRING, 2)
       oprot.writeString(self.clustername)
       oprot.writeFieldEnd()
+    if self.clean is not None:
+      oprot.writeFieldBegin('clean', TType.BOOL, 3)
+      oprot.writeBool(self.clean)
+      oprot.writeFieldEnd()
     if self.s4clustersname is not None:
-      oprot.writeFieldBegin('s4clustersname', TType.LIST, 3)
+      oprot.writeFieldBegin('s4clustersname', TType.LIST, 4)
       oprot.writeListBegin(TType.STRING, len(self.s4clustersname))
       for iter27 in self.s4clustersname:
         oprot.writeString(iter27)

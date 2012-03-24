@@ -1,5 +1,6 @@
 package io.s4.manager.test;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +14,9 @@ import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
 
 public class testclient {
+	
+	public static final String ClusterName = "denghankun";
+	public static final String ZkAddress = "192.168.1.100:2181";
 
 	public static void main(String[] args) {
 		try {
@@ -22,23 +26,48 @@ public class testclient {
 			TProtocol protocol = new TBinaryProtocol(transport);
 			
 			ManagerServer.Client client = new ManagerServer.Client(protocol);
+			boolean isSucc;
 			
-			List<String> s4serverlist = new ArrayList<String>();
-			s4serverlist.add("192.168.1.25:5077");
-			List<String> adapterlist = new ArrayList<String>();
-			adapterlist.add("192.168.1.25:6077");
-			
-			
-			System.out.println(client.GetAllMachinesList());
+			List<String> machinelist = new ArrayList<String>();
+			machinelist.add("192.168.1.15:5077");
+			isSucc = client.CreateCluster(ZkAddress, ClusterName, machinelist);
+			System.out.println("CreateCluster:" + isSucc);
+			System.out.println(readClusterConfig());
+			String ClusterFullName = ClusterName + "@" + ZkAddress;
+			isSucc = client.CommitS4ClusterXMLConfig(readClusterConfig(), ClusterFullName, true, null);
+			System.out.println("Commit:" +isSucc);
 			System.out.println(client.GetAllClustersList());
 			
+			isSucc = client.StartS4ServerCluster(ClusterFullName, "s4", "client-adapter");
+			System.out.println("StartS4ServerCluster:" + isSucc);
 			
-			System.out.println(client.GetAllMachinesList());
-			System.out.println(client.GetAllClustersList());
+			System.out.println(client.GetS4ClusterMessage(ClusterFullName));
+			
+			isSucc = client.RemoveS4Cluster(ClusterFullName, "s4");
+			System.out.println("RemoveS4Cluster:" + isSucc);
+			
+			System.out.println(client.GetS4ClusterMessage(ClusterFullName));
 		} catch (TTransportException e) {
 			e.printStackTrace();
 		} catch (TException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static String readClusterConfig(){
+		try {
+			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("clusters.xml")));
+			String clusters = "";
+			String str = null;
+			while((str = br.readLine()) != null){
+				clusters += str;
+			}
+			return clusters;
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return "";
 	}
 }

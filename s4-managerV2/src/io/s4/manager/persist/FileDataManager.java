@@ -6,13 +6,10 @@ import io.s4.manager.core.ServerManager;
 import io.s4.manager.util.ConfigParser;
 import io.s4.manager.util.Constant;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,12 +30,17 @@ public class FileDataManager implements DataManager{
 	private final String XMLFile;
 	
 	public FileDataManager(String XMLFile){
-		this.XMLFile = XMLFile;
-	}
-	
-	private FileDataManager(){
-		XMLFile = "./conf/" + Constant.MACHINE_FILE;
-		parseDocument(XMLFile);
+		if(XMLFile == null || XMLFile.equals("")){
+			this.XMLFile = Constant.CONF_PATH + "/" + Constant.MACHINE_FILE;
+		} else {
+			this.XMLFile = XMLFile;
+		}
+		
+		try {
+			parseDocument(this.XMLFile);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 		VerifyMachineMap();
 	}
 	
@@ -46,7 +48,7 @@ public class FileDataManager implements DataManager{
 		
 	}
 	
-	private void parseDocument(String configFilename){
+	private void parseDocument(String configFilename) throws Exception{
 		Document document = ConfigParser.createDocument(configFilename);
 		NodeList topLevelNodeList = document.getChildNodes();
 		for (int i = 0; i < topLevelNodeList.getLength(); ++i) {
@@ -198,45 +200,5 @@ public class FileDataManager implements DataManager{
 			MachineList.add(machine);
 		}
 		return MachineList;
-	}
-
-	public static void main(String[] args){
-		FileDataManager fdm = new FileDataManager();
-		System.out.println(fdm.MachineMap);
-	}
-	
-	public void test1(FileDataManager fdm){
-		fdm.AddCluster("denghankun", "localhost:2181", null);
-		try {
-			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("clusters.xml")));
-			String target = new String();
-			String s = null;
-			while((s = br.readLine()) != null){
-				target += s;
-				//System.out.println(s);
-			}
-			
-			System.out.println(target);
-			
-			fdm.ReceiveXMLConfig(target, "denghankun@localhost:2181");
-			
-			ServerManager sm = fdm.GetCluster("denghankun@localhost:2181");
-			
-			sm.TaskSetup("./conf/denghankun@localhost:2181/clusters.xml", true, null);
-			
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public void test2(FileDataManager fdm){
-		Set<String> hostportset = fdm.MachineMap.keySet();
-		for(String hostport : hostportset){
-			System.out.println(fdm.MachineMap.get(hostport));
-		}
 	}
 }

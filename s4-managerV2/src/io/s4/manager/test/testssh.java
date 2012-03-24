@@ -8,9 +8,9 @@ public class testssh {
 	public static void main(String[] args) {
 		SSHWrapper sw = new SSHWrapper();
 		try {
-			sw.Authenticated("localhost", "denghankun", "dhk19890630");
-			String s4_image = "/home/denghankun/s4project/s4/build/s4-image/scripts/";
-			sw.RunRemoteCommand(s4_image + "start-s4.sh -r client-adapter &");
+			sw.Authenticated("192.168.1.15", "lenovo", "cloud");
+			String s4_image = "/home/lenovo/s4project/build/s4-image/scripts/";
+			sw.RunRemoteCommand(s4_image + "start-s4.sh -r client-adapter -g s4 -z 192.168.1.100:2181 dynamic &");
 			sw.close();
 		} catch (IOException e) {
 			e.printStackTrace();
