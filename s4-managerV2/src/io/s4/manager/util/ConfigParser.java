@@ -190,16 +190,14 @@ public class ConfigParser {
 					partition = Integer.parseInt(getElementContentText(node));
 
 				} catch (NumberFormatException nfe) {
-					throw new VerifyError("Bad partition specified "
-							+ getElementContentText(node));
+					throw new VerifyError("Bad partition specified " + getElementContentText(node));
 				}
 			} else if (node.getNodeName().equals("port")) {
 				try {
 					port = Integer.parseInt(getElementContentText(node));
 
 				} catch (NumberFormatException nfe) {
-					throw new VerifyError("Bad port specified "
-							+ getElementContentText(node));
+					throw new VerifyError("Bad port specified " + getElementContentText(node));
 				}
 			} else if (node.getNodeName().equals("machine")) {
 				machineName = getElementContentText(node);
@@ -217,12 +215,11 @@ public class ConfigParser {
 		return new ClusterNode(partition, port, machineName, taskId, user, pass, s4image);
 	}
 
-	private static Document createDocument(String configFilename) {
+	public static Document createDocument(String configFilename) {
 		try {
 			Document document;
 			// Get a JAXP parser factory object
-			javax.xml.parsers.DocumentBuilderFactory dbf = DocumentBuilderFactory
-					.newInstance();
+			javax.xml.parsers.DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			// Tell the factory what kind of parser we want
 			dbf.setValidating(false);
 			dbf.setIgnoringComments(true);
@@ -250,8 +247,7 @@ public class ConfigParser {
 			// required.
 			InputStream is = getResourceStream(configFilename);
 			if (is == null) {
-				throw new RuntimeException("Unable to find config file:"
-						+ configFilename);
+				throw new RuntimeException("Unable to find config file:"+ configFilename);
 			}
 			document = parser.parse(is);
 			return document;
@@ -260,7 +256,7 @@ public class ConfigParser {
 		}
 	}
 
-	public String getElementContentText(Node node) {
+	public static String getElementContentText(Node node) {
 		if (node.getNodeType() != Node.ELEMENT_NODE) {
 			return "";
 		}
@@ -288,12 +284,10 @@ public class ConfigParser {
 				if (f.isFile()) {
 					return new FileInputStream(configfile);
 				} else {
-					throw new RuntimeException("configFile " + configfile
-							+ "  is not a regular file:");
+					throw new RuntimeException("configFile " + configfile + "  is not a regular file:");
 				}
 			}
-			InputStream is = Thread.currentThread().getContextClassLoader()
-					.getResourceAsStream(configfile);
+			InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(configfile);
 			if (is != null) {
 				return is;
 			}

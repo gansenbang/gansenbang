@@ -66,6 +66,8 @@ public class ConfigUtils {
 				} catch (Exception e) {
 					throw new RuntimeException();
 				} 
+			} else {
+				nodeInfo.put("machine", node.getMachineName());
 			}
 			processSet.add(nodeInfo);
 		}

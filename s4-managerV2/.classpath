@@ -6,5 +6,8 @@
 	<classpathentry kind="lib" path="/home/denghankun/Javalib/json-20090211.jar"/>
 	<classpathentry kind="lib" path="/home/denghankun/Javalib/zookeeper-3.3.1.jar"/>
 	<classpathentry kind="lib" path="/home/denghankun/s4project/s4/build/s4-image/s4-core/lib/log4j-1.2.15.jar"/>
+	<classpathentry kind="lib" path="/home/denghankun/thrift-0.8.0/lib/java/build/lib/slf4j-api-1.5.8.jar"/>
+	<classpathentry kind="lib" path="/home/denghankun/thrift-0.8.0/lib/java/build/lib/slf4j-log4j12-1.5.8.jar"/>
+	<classpathentry kind="lib" path="/home/denghankun/thrift-0.8.0/lib/java/build/libthrift-0.8.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -11,13 +11,12 @@ public class testtasksetup {
 	public static String setupxml = "/home/denghankun/s4project/s4/build/s4-image/s4-core" +
 			"/conf/dynamic/clusters.xml";
 	
-	public static void main(String[] args){
+	public static void main(String[] args) throws Exception{
 		ServerManager sm = new ServerManager("localhost:2181");
 		Config config = parseXML();
 		List<Cluster> clusters = config.getClusters();
 		for(Cluster cluster : clusters){
 			System.out.println(cluster);
-			sm.TaskSetup(true, cluster, config.getVersion());
 		}
 	}
 	

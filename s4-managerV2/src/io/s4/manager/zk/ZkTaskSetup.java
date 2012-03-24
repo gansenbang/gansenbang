@@ -35,7 +35,7 @@ public class ZkTaskSetup extends DefaultWatcher {
 	String processListRoot;
 
 	public ZkTaskSetup(String address, String clusterName,
-			ClusterType clusterType) {
+			ClusterType clusterType) throws Exception {
 		this(address, clusterName, clusterType, null);
 	}
 
@@ -44,9 +44,10 @@ public class ZkTaskSetup extends DefaultWatcher {
 	 * 
 	 * @param address
 	 * @param clusterName
+	 * @throws Exception 
 	 */
 	public ZkTaskSetup(String address, String clusterName,
-			ClusterType clusterType, CommEventCallback callbackHandler) {
+			ClusterType clusterType, CommEventCallback callbackHandler) throws Exception {
 		super(address, callbackHandler);
 
 		this.root = "/" + clusterName + "/" + clusterType.toString();

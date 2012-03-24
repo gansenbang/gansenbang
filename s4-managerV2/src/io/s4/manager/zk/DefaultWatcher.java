@@ -27,11 +27,11 @@ public class DefaultWatcher implements Watcher{
 	private String zkAddress;
 	volatile boolean connected = false;
 	
-	protected DefaultWatcher(String address){
+	protected DefaultWatcher(String address) throws Exception{
 		this(address, null);
 	}
 	
-	protected DefaultWatcher(String address, CommEventCallback callbackHandler){
+	protected DefaultWatcher(String address, CommEventCallback callbackHandler) throws Exception{
 		this.zkAddress = address;
 		this.callbackHandler = callbackHandler;
 		if(zk == null){
@@ -54,7 +54,7 @@ public class DefaultWatcher implements Watcher{
 				}
 			} catch (Exception e) {
 				zk = null;
-				throw new RuntimeException(e);
+				throw new Exception(e);
 			}
 		}
 	}

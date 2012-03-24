@@ -15,6 +15,7 @@
  */
 package io.s4.manager.util;
 
+import io.s4.manager.util.ConfigParser.Cluster.ClusterType;
 import io.s4.manager.util.ConfigUtils;
 import io.s4.manager.util.ConfigParser;
 import io.s4.manager.util.ConfigParser.Cluster;
@@ -33,7 +34,7 @@ import java.util.Map;
  * 
  */
 public class TaskSetupApp {
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		String zkAddress = "";
 		boolean clean = false;
 		boolean setup = false;
@@ -66,7 +67,7 @@ public class TaskSetupApp {
 		System.exit(1);
 	}
 
-	public static void doMain(String zkAddress, boolean clean, boolean setup, String setupXml) {
+	public static void doMain(String zkAddress, boolean clean, boolean setup, String setupXml) throws Exception {
 		ConfigParser parser = new ConfigParser();
 		Config config = parser.parse(setupXml);
 		for (Cluster cluster : config.getClusters()) {
@@ -75,7 +76,7 @@ public class TaskSetupApp {
 	}
 
 	public static void processCluster(boolean clean, String zkAddress,
-			Cluster cluster, String version) {
+			Cluster cluster, String version) throws Exception {
 		List<Map<String, String>> clusterInfo = ConfigUtils.readConfig(cluster,
 																																												cluster.getName(), 
 																																												cluster.getType(), 

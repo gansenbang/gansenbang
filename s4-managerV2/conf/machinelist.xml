@@ -1,0 +1,8 @@
+<machines>
+	<machine>
+		<host>localhost</host>
+		<port>5077</port>
+		<pass>000</pass>
+		<s4image>/home/denghankun/</s4image>
+	</machine>
+</machines>
