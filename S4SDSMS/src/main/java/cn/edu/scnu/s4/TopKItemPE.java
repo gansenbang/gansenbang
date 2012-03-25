@@ -20,12 +20,12 @@ import org.json.JSONObject;
  *
  */
 public class TopKItemPE extends AbstractPE {
-	//private Map<String, Integer> topKMap = new ConcurrentHashMap<String, Integer>();
+	private Map<String, Integer> topKMap = new ConcurrentHashMap<String, Integer>();
 	private int entryCount = 10;
-	/*
+
 	private Persister persister;
 	private int persistTime;
-	private String persistKey = "myapp:topKItem";*/
+	private String persistKey = "myapp:topKItem";
 	
 	public int getEntryCount() {
         return entryCount;
@@ -34,7 +34,7 @@ public class TopKItemPE extends AbstractPE {
     public void setEntryCount(int entryCount) {
         this.entryCount = entryCount;
     }
-    /*
+    
     public Persister getPersister() {
         return persister;
     }
@@ -57,20 +57,24 @@ public class TopKItemPE extends AbstractPE {
 
     public void setPersistKey(String persistKey) {
         this.persistKey = persistKey;
-    }*/
+    }
 	
 	public void processEvent(TopKItem topKItem) {
-		System.out.println(topKItem);
-		//topKMap.put(topKItem.getKey(), topKItem.getValue());
+		System.out.println("Received : " + topKItem);
+		topKMap.put(topKItem.getKey(), topKItem.getValue());
 	}
 
 	@Override
 	public void output() {
 		// TODO Auto-generated method stub
 		List<TopKItem> list = new ArrayList<TopKItem>();
-		/*
-		for (String key : topKMap.keySet())
-			list.add(new TopKItem(key, topKMap.get(key)));
+		
+		for (String key : topKMap.keySet()) {
+			TopKItem item = new TopKItem();
+			item.setKey(key);
+			item.setValue(topKMap.get(key));
+			list.add(item);
+		}
 		
 		Collections.sort(list);
 		System.out.println("testtest");
@@ -90,11 +94,11 @@ public class TopKItemPE extends AbstractPE {
                 jsonTopK.put(jsonEntry);
             }
             message.put("topK", jsonTopK);
-            System.out.println(message);
-            //persister.set(persistKey, message.toString()+"\n", persistTime);
+            //System.out.println(message);
+            persister.set(persistKey, message.toString()+"\n", persistTime);
         } catch (Exception e) {
             Logger.getLogger("s4").error(e);
-        }*/
+        }
 	} 
 	
 }

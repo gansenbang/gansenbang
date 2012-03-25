@@ -11,11 +11,6 @@ public class TopKItem implements Comparable<TopKItem> {
 	private String key;
 	private int value;
 	
-	public TopKItem(String key, int value) {
-		this.key = key;
-		this.value = value;
-	}
-	
 	public String getKey() {
 		return key;
 	}
@@ -32,9 +27,17 @@ public class TopKItem implements Comparable<TopKItem> {
 		this.value = value;
 	}
 	
+	public String getTopKItem() {
+        return "1";
+    }
+
+    public void setTopKItem(String id) {
+        // do nothing
+    }
+	
 	@Override
 	public String toString() {
-		return "{" + key + ":" + value + "}";
+		return "{key:" + key + ",value:" + value + "}";
 	}
 
 	@Override

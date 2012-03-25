@@ -15,12 +15,12 @@ import cn.edu.scnu.s4.TopKItem;
 public class TrafficFlowPE extends AbstractPE {
 	private Dispatcher dispatcher;  
 	  
-    public Dispatcher getDispatcher() {  
+    public Dispatcher getDispatcher() {
         return dispatcher;  
-    }  
+    }
   
     public void setDispatcher(Dispatcher dispatcher) {  
-        this.dispatcher = dispatcher;  
+        this.dispatcher = dispatcher;
     }
 	
 	public void processEvent(TrafficFlow trafficFlow) {
@@ -38,9 +38,16 @@ public class TrafficFlowPE extends AbstractPE {
 		System.out.println("    mileage: " + trafficFlow.getMileage());*/
 		//System.out.println("Received " + trafficFlow.toString());
 		
-		String key = trafficFlow.getZone() + ":" + trafficFlow.getIdentifyingStation() + ":" + trafficFlow.getCarType();
+		String key = trafficFlow.getZone() + "-" + trafficFlow.getIdentifyingStation() + "-" + trafficFlow.getCarType();
 		int value = trafficFlow.getFigure();
-		TopKItem topKItem = new TopKItem(key, value);
+		//Celebrate c = new Celebrate();
+        //c.setKey(key);
+        //c.setValue(value);
+        //dispatcher.dispatchEvent("Celebrate", c);
+		TopKItem topKItem = new TopKItem();
+		topKItem.setKey(key);
+		topKItem.setValue(value);
+		//System.out.println(topKItem);
 		dispatcher.dispatchEvent("TopKItem", topKItem);
     }
     

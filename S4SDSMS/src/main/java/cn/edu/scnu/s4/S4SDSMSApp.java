@@ -68,7 +68,8 @@ public class S4SDSMSApp {
             FileInputStream fis = null;
             
     		try {
-    			fis = new FileInputStream("/home/user/s4/build/s4-image/s4-example-testinput/rate.jin");
+    			//fis = new FileInputStream("/home/user/s4/build/s4-image/s4-example-testinput/rate.jin");
+    			fis = new FileInputStream("/home/phoenixcw/cloud/s4/build/s4-image/s4-example-testinput/rate.jin");
     		} catch (FileNotFoundException e) {
     			// TODO Auto-generated catch block
     			e.printStackTrace();
