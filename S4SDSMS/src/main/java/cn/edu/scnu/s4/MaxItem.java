@@ -7,7 +7,7 @@ package cn.edu.scnu.s4;
  * @author ChunweiXu
  *
  */
-public class MaxItem implements Comparable<MaxItem> {
+public class MaxItem {
 	private String key;
 	private int value;
 	
@@ -38,17 +38,6 @@ public class MaxItem implements Comparable<MaxItem> {
 	@Override
 	public String toString() {
 		return "{key:" + key + ",value:" + value + "}";
-	}
-	
-	@Override
-	public int compareTo(MaxItem maxItem) {
-		// TODO Auto-generated method stub
-		if (maxItem.getValue() < this.value) {
-            return -1;
-        } else if (maxItem.getValue() > this.value) {
-            return 1;
-        }
-        return 0;
 	}
 
 }

@@ -14,7 +14,7 @@ import org.json.JSONObject;
  *
  */
 public class MaxItemPE extends AbstractPE {
-	MaxItem totalMaxItem;
+	MaxItem totalMaxItem = null;
 	
 	private Persister persister;
 	private int persistTime;
@@ -46,13 +46,14 @@ public class MaxItemPE extends AbstractPE {
 	
 	public void processEvent(MaxItem maxItem) {
 		//System.out.println("Received : " + maxItem);
-		if (maxItem.getValue() > totalMaxItem.getValue())
+		if (totalMaxItem == null || maxItem.getValue() > totalMaxItem.getValue())
 			totalMaxItem = maxItem;
 	}
 
 	@Override
 	public void output() {
-		System.out.println("xxxxxxx : " + totalMaxItem);
+		//System.out.println("xxxxxxx : " + totalMaxItem);
+		
 		try {
             JSONObject message = new JSONObject();
             
