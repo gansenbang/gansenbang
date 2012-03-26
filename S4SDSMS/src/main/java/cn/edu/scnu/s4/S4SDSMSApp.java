@@ -75,8 +75,8 @@ public class S4SDSMSApp {
     			e.printStackTrace();
     		}
     		
-            inputReader = new InputStreamReader(fis);
-    		//inputReader = new InputStreamReader(System.in);
+            //inputReader = new InputStreamReader(fis);
+    		inputReader = new InputStreamReader(System.in);
             br = new BufferedReader(inputReader);
 
             for (String inputLine = null; (inputLine = br.readLine()) != null;) {

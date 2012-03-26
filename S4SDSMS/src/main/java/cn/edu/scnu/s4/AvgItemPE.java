@@ -12,12 +12,13 @@ import org.json.JSONObject;
  * @author ChunweiXu
  *
  */
-public class MinItemPE extends AbstractPE {
-	MinItem totalMinItem = null;
+public class AvgItemPE extends AbstractPE {
+	private double sum = 0;
+	private int count = 0;
 	
 	private Persister persister;
 	private int persistTime;
-	private String persistKey = "myapp:minItem";
+	private String persistKey = "myapp:avgItem";
 	
 	public Persister getPersister() {
         return persister;
@@ -43,25 +44,27 @@ public class MinItemPE extends AbstractPE {
         this.persistKey = persistKey;
     }
 	
-	public void processEvent(MinItem minItem) {
-		//System.out.println("Received : " + minItem);
-		if (totalMinItem == null || minItem.getValue() < totalMinItem.getValue())
-			totalMinItem = minItem;
+	public void processEvent(AvgItem avgItem) {
+		System.out.println("Received : " + avgItem);
+		sum += avgItem.getValue();
+		++count;
 	}
 
 	@Override
 	public void output() {
-		//System.out.println("xxxxxxx : " + totalMinItem);
+		if (count > 0) {
+			System.out.println("xxxxxxx : " + sum / count);
 		
-		try {
-            JSONObject message = new JSONObject();
-            
-            message.put("key", totalMinItem.getKey());
-            message.put("value", totalMinItem.getValue());
-            
-            persister.set(persistKey, message.toString()+"\n", persistTime);
-        } catch (Exception e) {
-            Logger.getLogger("s4").error(e);
-        }
-	}
+			try {
+	            JSONObject message = new JSONObject();
+	            
+	            message.put("avg", sum / count);
+	            
+	            persister.set(persistKey, message.toString()+"\n", persistTime);
+	        } catch (Exception e) {
+	            Logger.getLogger("s4").error(e);
+	        }
+		}
+	} 
+	
 }

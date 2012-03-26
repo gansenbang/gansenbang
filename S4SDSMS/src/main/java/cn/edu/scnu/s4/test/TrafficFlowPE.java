@@ -9,6 +9,7 @@ import org.apache.s4.processor.AbstractPE;
 import cn.edu.scnu.s4.TopKItem;
 import cn.edu.scnu.s4.MaxItem;
 import cn.edu.scnu.s4.MinItem;
+import cn.edu.scnu.s4.AvgItem;
 
 /**
  * @author ChunweiXu
@@ -57,6 +58,11 @@ public class TrafficFlowPE extends AbstractPE {
 		minItem.setKey(key);
 		minItem.setValue(value);
 		dispatcher.dispatchEvent("MinItem", minItem);
+		
+		AvgItem avgItem = new AvgItem();
+		avgItem.setKey(key);
+		avgItem.setValue(value);
+		dispatcher.dispatchEvent("AvgItem", avgItem);
     }
     
     @Override
