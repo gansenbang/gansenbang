@@ -12,33 +12,49 @@
 			</list>
 		</property>
 	</bean>
-
+<!-- 
 	<bean id="topKItemCatcher" class="cn.edu.scnu.s4.TopKItemPE">
 		<property name="keys">
 			<list>
 				<value>TopKItem *</value>
 			</list>
 		</property>
-		<property name="persister" ref="dtfPersister"/>
+		<property name="persister" ref="topKItemPersister"/>
     	<property name="persistTime" value="864000"/>
     	<property name="persistKey" value="myapp:top10Items"/>
 	</bean>
-	
-	<bean id="dtfPersister" class="cn.edu.scnu.s4.DirectToFilePersister">
+	 -->
+	<bean id="maxItemCatcher" class="cn.edu.scnu.s4.MaxItemPE">
+		<property name="keys">
+			<list>
+				<value>MaxItem *</value>
+			</list>
+		</property>
+		<property name="persister" ref="maxItemPersister"/>
+    	<property name="persistTime" value="864000"/>
+    	<property name="persistKey" value="myapp:maxItems"/>
+	</bean>
+<!-- 	  
+	<bean id="topKItemPersister" class="cn.edu.scnu.s4.DirectToFilePersister">
     	<property name="outputFilename" value="/tmp/top_k_hashtags"/>
   	</bean>
-
+  	 -->
+  	<bean id="maxItemPersister" class="cn.edu.scnu.s4.DirectToFilePersister">
+    	<property name="outputFilename" value="/tmp/max_hashtags"/>
+  	</bean>
+  	
 	<bean id="dispatcher" class="org.apache.s4.dispatcher.Dispatcher"
 		init-method="init">
 		<property name="partitioners">
 			<list>
-				<ref bean="topKItemPartitioner" />
+				<!-- <ref bean="topKItemPartitioner" /> -->
+				<ref bean="maxItemPartitioner" />
 			</list>
 		</property>
 		<property name="eventEmitter" ref="commLayerEmitter" />
 		<property name="loggerName" value="s4" />
 	</bean>
-
+<!-- 
 	<bean id="topKItemPartitioner" class="org.apache.s4.dispatcher.partitioner.DefaultPartitioner">
 		<property name="streamNames">
 			<list>
@@ -48,6 +64,21 @@
 		<property name="hashKey">
 			<list>
 				<value>topKItem</value>
+			</list>
+		</property>
+		<property name="hasher" ref="hasher" />
+		<property name="debug" value="true" />
+	</bean>
+	 -->
+	<bean id="maxItemPartitioner" class="org.apache.s4.dispatcher.partitioner.DefaultPartitioner">
+		<property name="streamNames">
+			<list>
+				<value>MaxItem</value>
+			</list>
+		</property>
+		<property name="hashKey">
+			<list>
+				<value>maxItem</value>
 			</list>
 		</property>
 		<property name="hasher" ref="hasher" />

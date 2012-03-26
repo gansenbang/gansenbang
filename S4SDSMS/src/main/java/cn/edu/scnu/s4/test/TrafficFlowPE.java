@@ -7,6 +7,7 @@ import org.apache.s4.dispatcher.Dispatcher;
 import org.apache.s4.processor.AbstractPE;
 
 import cn.edu.scnu.s4.TopKItem;
+import cn.edu.scnu.s4.MaxItem;
 
 /**
  * @author ChunweiXu
@@ -40,15 +41,16 @@ public class TrafficFlowPE extends AbstractPE {
 		
 		String key = trafficFlow.getZone() + "-" + trafficFlow.getIdentifyingStation() + "-" + trafficFlow.getCarType();
 		int value = trafficFlow.getFigure();
-		//Celebrate c = new Celebrate();
-        //c.setKey(key);
-        //c.setValue(value);
-        //dispatcher.dispatchEvent("Celebrate", c);
+		
 		TopKItem topKItem = new TopKItem();
 		topKItem.setKey(key);
 		topKItem.setValue(value);
-		//System.out.println(topKItem);
 		dispatcher.dispatchEvent("TopKItem", topKItem);
+		
+		MaxItem maxItem = new MaxItem();
+		maxItem.setKey(key);
+		maxItem.setValue(value);
+		dispatcher.dispatchEvent("MaxItem", maxItem);
     }
     
     @Override

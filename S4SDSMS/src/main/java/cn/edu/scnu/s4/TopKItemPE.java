@@ -60,7 +60,7 @@ public class TopKItemPE extends AbstractPE {
     }
 	
 	public void processEvent(TopKItem topKItem) {
-		System.out.println("Received : " + topKItem);
+		//System.out.println("Received : " + topKItem);
 		topKMap.put(topKItem.getKey(), topKItem.getValue());
 	}
 
@@ -77,7 +77,7 @@ public class TopKItemPE extends AbstractPE {
 		}
 		
 		Collections.sort(list);
-		System.out.println("testtest");
+		//System.out.println("testtest");
 		
 		try {
             JSONObject message = new JSONObject();
