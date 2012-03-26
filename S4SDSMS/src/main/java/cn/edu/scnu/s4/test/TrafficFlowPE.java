@@ -8,6 +8,7 @@ import org.apache.s4.processor.AbstractPE;
 
 import cn.edu.scnu.s4.TopKItem;
 import cn.edu.scnu.s4.MaxItem;
+import cn.edu.scnu.s4.MinItem;
 
 /**
  * @author ChunweiXu
@@ -51,6 +52,11 @@ public class TrafficFlowPE extends AbstractPE {
 		maxItem.setKey(key);
 		maxItem.setValue(value);
 		dispatcher.dispatchEvent("MaxItem", maxItem);
+		
+		MinItem minItem = new MinItem();
+		minItem.setKey(key);
+		minItem.setValue(value);
+		dispatcher.dispatchEvent("MinItem", minItem);
     }
     
     @Override
