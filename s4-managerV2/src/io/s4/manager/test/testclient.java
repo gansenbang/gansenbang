@@ -4,7 +4,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.s4.manager.cluster.ManagerServer;
+import io.s4.manager.thrift.S4Manager;
 
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
@@ -25,7 +25,7 @@ public class testclient {
 			// set the protocol
 			TProtocol protocol = new TBinaryProtocol(transport);
 			
-			ManagerServer.Client client = new ManagerServer.Client(protocol);
+			S4Manager.Client client = new S4Manager.Client(protocol);
 			boolean isSucc;
 			
 			List<String> machinelist = new ArrayList<String>();
@@ -34,7 +34,7 @@ public class testclient {
 			System.out.println("CreateCluster:" + isSucc);
 			System.out.println(readClusterConfig());
 			String ClusterFullName = ClusterName + "@" + ZkAddress;
-			isSucc = client.CommitS4ClusterXMLConfig(readClusterConfig(), ClusterFullName, true, null);
+			isSucc = client.CommitS4ClusterXMLConfig(readClusterConfig(), ClusterFullName);
 			System.out.println("Commit:" +isSucc);
 			System.out.println(client.GetAllClustersList());
 			

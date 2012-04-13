@@ -2,9 +2,12 @@ package io.s4.manager.util;
 
 import io.s4.manager.util.ConfigParser.Cluster.ClusterType;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -22,26 +25,33 @@ import org.xml.sax.SAXParseException;
 
 public class ConfigParser {
 
+	public static enum StringType{
+		CONFIGURL, CONFIGCONTENT
+	}
+	
 	public ConfigParser() {
 	}
 
-	public Config parse(String configFilename) throws Exception {
+	//use to config zookeeper
+	public Config parse(String configFilename, boolean abort,StringType st) throws Exception {
 		Config config = null;
 
-		Document document = createDocument(configFilename);
-		NodeList topLevelNodeList = document.getChildNodes();
-		for (int i = 0; i < topLevelNodeList.getLength(); ++i) {
-			Node node = topLevelNodeList.item(i);
-			if (node.getNodeType() == Node.ELEMENT_NODE
-					&& node.getNodeName().equals("config")) {
-				config = processConfigElement(node);
+		Document document = createDocument(configFilename, abort, st);
+		if(document != null){
+			NodeList topLevelNodeList = document.getChildNodes();
+			for (int i = 0; i < topLevelNodeList.getLength(); ++i) {
+				Node node = topLevelNodeList.item(i);
+				if (node.getNodeType() == Node.ELEMENT_NODE
+						&& node.getNodeName().equals("config")) {
+					config = processConfigElement(node);
+				}
 			}
+			verifyConfig(config);
 		}
-		verifyConfig(config);
 		return config;
 	}
 
-	private void verifyConfig(Config config) {
+	private void verifyConfig(Config config) throws VerifyError{
 		if (config.getClusters().size() == 0) {
 			throw new VerifyError("No clusters specified");
 		}
@@ -52,7 +62,7 @@ public class ConfigParser {
 		}
 	}
 
-	public void verifyCluster(Cluster cluster) {
+	public void verifyCluster(Cluster cluster) throws VerifyError{
 		if (cluster.getNodes().size() == 0) {
 			throw new VerifyError("No nodes in cluster " + cluster.getName());
 		}
@@ -75,7 +85,7 @@ public class ConfigParser {
 		}
 	}
 
-	public void verifyS4Cluster(Cluster cluster) {
+	public void verifyS4Cluster(Cluster cluster) throws VerifyError{
 		/*
 		 * rules: 1) if any node has a partition id, a) all must have partition
 		 * ids b) the partition ids must be 0-n, where n is the number of nodes
@@ -109,7 +119,7 @@ public class ConfigParser {
 		}
 	}
 
-	public void verifyAdapterCluster(Cluster cluster) {
+	public void verifyAdapterCluster(Cluster cluster) throws VerifyError{
 		for (ClusterNode node : cluster.getNodes()) {
 			if (node.getPartition() != -1) {
 				throw new VerifyError(
@@ -118,7 +128,7 @@ public class ConfigParser {
 		}
 	}
 
-	public Config processConfigElement(Node configElement) {
+	public Config processConfigElement(Node configElement) throws VerifyError{
 		String version = ((Element) configElement).getAttribute("version");
 		if (version == null || version.length() > 0) {
 			version = "-1";
@@ -129,7 +139,8 @@ public class ConfigParser {
 		Config config = new Config(version);
 		for (int i = 0; i < nodeList.getLength(); i++) {
 			Node node = nodeList.item(i);
-			if (node.getNodeType() == Node.ELEMENT_NODE && node.getNodeName().equals("cluster")) {
+			if (node.getNodeType() == Node.ELEMENT_NODE
+					&& node.getNodeName().equals("cluster")) {
 				config.addCluster(processClusterElement(node));
 			}
 		}
@@ -137,7 +148,7 @@ public class ConfigParser {
 		return config;
 	}
 
-	public Cluster processClusterElement(Node clusterElement) {
+	public Cluster processClusterElement(Node clusterElement) throws VerifyError{
 		Cluster cluster = new Cluster();
 
 		String mode = ((Element) clusterElement).getAttribute("mode");
@@ -168,14 +179,11 @@ public class ConfigParser {
 		return cluster;
 	}
 
-	public ClusterNode processClusterNodeElement(Node clusterNodeElement) {
+	public ClusterNode processClusterNodeElement(Node clusterNodeElement) throws VerifyError{
 		int partition = -1;
 		int port = 0;
 		String machineName = null;
 		String taskId = null;
-		String user = null;
-		String pass = null;
-		String s4image = null;
 
 		NodeList nodeList = clusterNodeElement.getChildNodes();
 		for (int i = 0; i < nodeList.getLength(); i++) {
@@ -190,70 +198,74 @@ public class ConfigParser {
 					partition = Integer.parseInt(getElementContentText(node));
 
 				} catch (NumberFormatException nfe) {
-					throw new VerifyError("Bad partition specified " + getElementContentText(node));
+					throw new VerifyError("Bad partition specified "
+							+ getElementContentText(node));
 				}
 			} else if (node.getNodeName().equals("port")) {
 				try {
 					port = Integer.parseInt(getElementContentText(node));
 
 				} catch (NumberFormatException nfe) {
-					throw new VerifyError("Bad port specified " + getElementContentText(node));
+					throw new VerifyError("Bad port specified "
+							+ getElementContentText(node));
 				}
 			} else if (node.getNodeName().equals("machine")) {
 				machineName = getElementContentText(node);
 			} else if (node.getNodeName().equals("taskId")) {
 				taskId = getElementContentText(node);
-			} else if (node.getNodeName().equals("user")) {
-				user = getElementContentText(node);
-			} else if (node.getNodeName().equals("pass")) {
-				pass = getElementContentText(node);
-			} else if (node.getNodeName().equals("s4image")) {
-				s4image = getElementContentText(node);
-			}
+			} 
 		}
 
-		return new ClusterNode(partition, port, machineName, taskId, user, pass, s4image);
+		return new ClusterNode(partition, port, machineName, taskId);
 	}
 
-	public static Document createDocument(String configFilename) throws Exception {
-		try {
-			Document document;
-			// Get a JAXP parser factory object
-			javax.xml.parsers.DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			// Tell the factory what kind of parser we want
-			dbf.setValidating(false);
-			dbf.setIgnoringComments(true);
-			dbf.setIgnoringElementContentWhitespace(true);
-			// Use the factory to get a JAXP parser object
-			javax.xml.parsers.DocumentBuilder parser = dbf.newDocumentBuilder();
+	
+	public static Document createDocument(String config, boolean abort, StringType st) throws Exception {
+		Document document = null;
+		// Get a JAXP parser factory object
+		javax.xml.parsers.DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		// Tell the factory what kind of parser we want
+		dbf.setValidating(false);
+		dbf.setIgnoringComments(true);
+		dbf.setIgnoringElementContentWhitespace(true);
+		// Use the factory to get a JAXP parser object
+		javax.xml.parsers.DocumentBuilder parser = dbf.newDocumentBuilder();
 
-			// Tell the parser how to handle errors. Note that in the JAXP API,
-			// DOM parsers rely on the SAX API for error handling
-			parser.setErrorHandler(new org.xml.sax.ErrorHandler() {
-				public void warning(SAXParseException e) {
-				}
-
-				public void error(SAXParseException e) {
-				}
-
-				public void fatalError(SAXParseException e) throws SAXException {
-					throw e; // re-throw the error
-				}
-			});
-
-			// Finally, use the JAXP parser to parse the file. This call returns
-			// A Document object. Now that we have this object, the rest of this
-			// class uses the DOM API to work with it; JAXP is no longer
-			// required.
-			InputStream is = getResourceStream(configFilename);
-			if (is == null) {
-				throw new Exception("Unable to find config file:"+ configFilename);
+		// Tell the parser how to handle errors. Note that in the JAXP API,
+		// DOM parsers rely on the SAX API for error handling
+		parser.setErrorHandler(new org.xml.sax.ErrorHandler() {
+			public void warning(SAXParseException e) {
 			}
-			document = parser.parse(is);
-			return document;
-		} catch (Exception e) {
-			throw new Exception(e);
+
+			public void error(SAXParseException e) {
+			}
+
+			public void fatalError(SAXParseException e) throws SAXException {
+				throw e; // re-throw the error
+			}
+		});
+
+		// Finally, use the JAXP parser to parse the file. This call returns
+		// A Document object. Now that we have this object, the rest of this
+		// class uses the DOM API to work with it; JAXP is no longer
+		// required.
+		InputStream is = null;
+		if(st == StringType.CONFIGURL){
+			is = getResourceStream(config, abort);
+		} else if(st == StringType.CONFIGCONTENT){
+			is = new ByteArrayInputStream(config.getBytes(Charset.defaultCharset()));
 		}
+		if (is == null) {
+			if(abort){
+				throw new RuntimeException("Unable to find config file:" + config);
+			} else {
+				throw new Exception("Unable to find config file:" + config);
+			}
+		}
+		if(is != null)
+			document = parser.parse(is);
+		return document;
+
 	}
 
 	public static String getElementContentText(Node node) {
@@ -271,26 +283,29 @@ public class ConfigParser {
 		return "";
 	}
 
-	public static void main(String[] args) {
-		
-	}
-
-	private static InputStream getResourceStream(String configfile) {
+	private static InputStream getResourceStream(String configfile, boolean abort) {
 		try {
 			File f = new File(configfile);
 			if (f.exists()) {
 				if (f.isFile()) {
 					return new FileInputStream(configfile);
 				} else {
-					throw new RuntimeException("configFile " + configfile + "  is not a regular file:");
+					if (abort){
+						throw new RuntimeException("configFile " + configfile
+								+ "  is not a regular file:");
+					}
 				}
 			}
 			InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(configfile);
 			if (is != null) {
 				return is;
 			}
-		} catch (Exception e) {
-			throw new RuntimeException(e);
+		} catch (FileNotFoundException fnfe) {
+			//unhandle the exception
+			if(abort){
+				throw new RuntimeException(fnfe);
+			}
+			fnfe.printStackTrace();
 		}
 		return null;
 	}
@@ -319,7 +334,7 @@ public class ConfigParser {
 		}
 
 		public List<Cluster> getClusters() {
-			return Collections.unmodifiableList(clusters);
+			return clusters;
 		}
 
 		public String toString() {
@@ -352,7 +367,7 @@ public class ConfigParser {
 		}
 
 		public List<ConfigParser.ClusterNode> getNodes() {
-			return Collections.unmodifiableList(nodes);
+			return nodes;
 		}
 
 		public String getMode() {
@@ -382,8 +397,8 @@ public class ConfigParser {
 		public String toString() {
 			StringBuffer sb = new StringBuffer();
 			sb.append("{name=").append(name).append(",mode=").append(mode)
-					.append(",type=").append(type).append(",nodes=")
-					.append(nodes).append("}");
+			  .append(",type=").append(type).append(",nodes=")
+			  .append(nodes).append("}");
 			return sb.toString();
 		}
 
@@ -394,19 +409,12 @@ public class ConfigParser {
 		private int port;
 		private String machineName;
 		private String taskId;
-		private String user;
-		private String pass;
-		private String s4image;
 
-		public ClusterNode(int partition, int port, String machineName,
-				String taskId, String user, String pass, String s4image) {
+		public ClusterNode(int partition, int port, String machineName, String taskId) {
 			this.partition = partition;
 			this.port = port;
 			this.machineName = machineName;
 			this.taskId = taskId;
-			this.user = user;
-			this.pass = pass;
-			this.s4image = s4image;
 		}
 
 		public int getPartition() {
@@ -424,41 +432,16 @@ public class ConfigParser {
 		public String getTaskId() {
 			return taskId;
 		}
-		
-		public String getUser() {
-			return user;
-		}
-
-		public void setUser(String user) {
-			this.user = user;
-		}
-
-		public String getPass() {
-			return pass;
-		}
-
-		public void setPass(String pass) {
-			this.pass = pass;
-		}
-
-		public String getS4image() {
-			return s4image;
-		}
-
-		public void setS4image(String s4image) {
-			this.s4image = s4image;
-		}
 
 		@Override
 		public String toString() {
-			return "ClusterNode [partition=" + partition + ", port=" + port
+			return "ClusterNode {partition=" + partition + ", port=" + port
 					+ ", machineName=" + machineName + ", taskId=" + taskId
-					+ ", user=" + user + ", pass=" + pass + ", s4image="
-					+ s4image + "]";
+					+ "}";
 		}
 	}
 
-	public class VerifyError extends RuntimeException {
+	public class VerifyError extends Exception {
 
 		private static final long serialVersionUID = 1L;
 

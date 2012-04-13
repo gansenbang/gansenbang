@@ -1,9 +1,9 @@
 package io.s4.manager.core;
 
-import io.s4.manager.cluster.ManagerServer;
-import io.s4.manager.cluster.ManagerServerImpl;
 import io.s4.manager.persist.DataManager;
 import io.s4.manager.persist.FileDataManager;
+import io.s4.manager.thrift.ManagerServerImpl;
+import io.s4.manager.thrift.S4Manager;
 
 import org.apache.thrift.TProcessor;
 import org.apache.thrift.protocol.TBinaryProtocol;
@@ -38,7 +38,7 @@ public class ClusterManager {
 		// set the protocol factory
 		Factory proFactory = new TBinaryProtocol.Factory();
 					
-		TProcessor processor = new ManagerServer.Processor<ManagerServerImpl>(new ManagerServerImpl(dm));
+		TProcessor processor = new S4Manager.Processor<ManagerServerImpl>(new ManagerServerImpl(dm));
 					
 		server = new TThreadPoolServer(new TThreadPoolServer.Args(serverTransport)
 																															.processor(processor)

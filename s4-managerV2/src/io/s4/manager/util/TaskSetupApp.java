@@ -68,7 +68,7 @@ public class TaskSetupApp {
 
 	public static void doMain(String zkAddress, boolean clean, boolean setup, String setupXml) throws Exception {
 		ConfigParser parser = new ConfigParser();
-		Config config = parser.parse(setupXml);
+		Config config = parser.parse(setupXml, true, ConfigParser.StringType.CONFIGURL);
 		for (Cluster cluster : config.getClusters()) {
 			processCluster(clean, zkAddress, cluster, config.getVersion());
 		}

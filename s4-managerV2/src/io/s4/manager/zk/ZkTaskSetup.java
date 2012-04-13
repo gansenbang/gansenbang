@@ -55,7 +55,7 @@ public class ZkTaskSetup extends DefaultWatcher {
 		this.processListRoot = root + "/process";
 	}
 
-	public void setUpTasks(Object[] data) {
+	public void setUpTasks(Object[] data) throws Exception {
 		setUpTasks("-1", data);
 	}
 
@@ -64,8 +64,9 @@ public class ZkTaskSetup extends DefaultWatcher {
 	 * 
 	 * @param version
 	 * @param data
+	 * @throws Exception 
 	 */
-	public void setUpTasks(String version, Object[] data) {
+	public void setUpTasks(String version, Object[] data) throws Exception {
 		try {
 			if (!version.equals("-1")) {
 				if (!isConfigVersionNewer(version)) {
@@ -123,11 +124,11 @@ public class ZkTaskSetup extends DefaultWatcher {
 				}
 			}
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			throw new Exception(e);
 		}
 	}
 
-	private boolean isConfigDataNewer(Object[] data) {
+	private boolean isConfigDataNewer(Object[] data) throws Exception {
 		try {
 			Stat s;
 			s = zk.exists(tasksListRoot, false);
@@ -140,8 +141,7 @@ public class ZkTaskSetup extends DefaultWatcher {
 				for (String child : children) {
 					String childPath = tasksListRoot + "/" + child;
 					Stat sTemp = zk.exists(childPath, false);
-					byte[] tempData = zk.getData(tasksListRoot + "/" + child,
-							false, sTemp);
+					byte[] tempData = zk.getData(tasksListRoot + "/" + child, false, sTemp);
 					Map<String, Object> map = (Map<String, Object>) JSONUtil.getMapFromJson(new String(tempData));
 
 					// check if it matches any of the data
@@ -162,7 +162,7 @@ public class ZkTaskSetup extends DefaultWatcher {
 				return true;
 			}
 		} catch (Exception e) {
-			throw new RuntimeException(
+			throw new Exception(
 					" Exception in isConfigDataNewer method ", e);
 		}
 		return false;
@@ -209,7 +209,7 @@ public class ZkTaskSetup extends DefaultWatcher {
 						zk.delete(tasksListRoot + "/" + child, 0);
 					}
 				}
-				zk.delete(tasksListRoot, 0);
+				zk.delete(tasksListRoot, -1);
 			}
 
 			exists = zk.exists(processListRoot, false);
@@ -220,10 +220,11 @@ public class ZkTaskSetup extends DefaultWatcher {
 						zk.delete(processListRoot + "/" + child, 0);
 					}
 				}
-				zk.delete(processListRoot, 0);
+				zk.delete(processListRoot, -1);
 			}
 			return true;
 		} catch (Exception e) {
+			e.printStackTrace();
 			return false;
 		}
 	}

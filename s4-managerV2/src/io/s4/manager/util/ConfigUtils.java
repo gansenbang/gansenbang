@@ -19,7 +19,7 @@ public class ConfigUtils {
 	public static List<Map<String, String>> readConfig(String configFilename,
 			String clusterName, ClusterType clusterType, boolean isStatic) throws Exception {
 		ConfigParser parser = new ConfigParser();
-		ConfigParser.Config config = parser.parse(configFilename);
+		ConfigParser.Config config = parser.parse(configFilename, true, ConfigParser.StringType.CONFIGURL);
 
 		// find the requested cluster
 		Cluster cluster = null;
@@ -30,7 +30,7 @@ public class ConfigUtils {
 			}
 		}
 		if (cluster == null) {
-			throw new RuntimeException("Cluster " + clusterName + " of type "
+			throw new Exception("Cluster " + clusterName + " of type "
 					+ clusterType + " not configured");
 		}
 		return readConfig(cluster, clusterName, clusterType, isStatic);
@@ -71,7 +71,7 @@ public class ConfigUtils {
 	}
 	
 	public static String GetHostAddress() throws UnknownHostException, SocketException {
-		Enumeration allNetInterfaces;
+		Enumeration<?> allNetInterfaces;
 		InetAddress ip = null;
 		allNetInterfaces = NetworkInterface.getNetworkInterfaces();
 		while (allNetInterfaces.hasMoreElements()) {
@@ -80,7 +80,7 @@ public class ConfigUtils {
 			if(!niName.equals("eth0") && !niName.equals("wlan0"))
 				continue;
 			else {
-				Enumeration addresses = netInterface.getInetAddresses();
+				Enumeration<?> addresses = netInterface.getInetAddresses();
 				while (addresses.hasMoreElements()) {
 					ip = (InetAddress) addresses.nextElement();
 					if (ip != null && ip instanceof Inet4Address) {
