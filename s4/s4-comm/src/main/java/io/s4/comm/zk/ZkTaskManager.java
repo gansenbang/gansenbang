@@ -106,8 +106,7 @@ public class ZkTaskManager extends DefaultWatcher implements TaskManager {
 						}
 						// try pick up a random task
 						Random random = new Random();
-						int id = Integer.parseInt(tasksAvailable.get(random
-								.nextInt(tasksAvailable.size())));
+						int id = Integer.parseInt(tasksAvailable.get(random.nextInt(tasksAvailable.size())));
 						String pNode = processListRoot + "/" + "task-" + id;
 						String tNode = tasksListRoot + "/" + "task-" + id;
 						Stat pNodeStat = zk.exists(pNode, false);
@@ -131,11 +130,11 @@ public class ZkTaskManager extends DefaultWatcher implements TaskManager {
 							map.put("taskSize", "" + tasks.size());
 							map.put("tasksRootNode", tasksListRoot);
 							map.put("processRootNode", processListRoot);
-							String create = zk.create(pNode, JSONUtil
-									.toJsonString(map).getBytes(),
-									Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
-							logger.info("Created process Node:" + pNode + " :"
-									+ create);
+							String create = zk.create(pNode, 
+																							  JSONUtil.toJsonString(map).getBytes(),
+																							  Ids.OPEN_ACL_UNSAFE, 
+																							  CreateMode.EPHEMERAL);
+							logger.info("Created process Node:" + pNode + " :" + create);
 							return map;
 						}
 					} else {

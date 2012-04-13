@@ -3,6 +3,9 @@
     <node>
       <partition>0</partition>
       <machine>localhost</machine>
+      <user>denghankun</user>
+      <pass>dhk19890630</pass>
+      <s4image>/home/denghankun/s4project/s4/build/s4-image/scripts</s4image>
       <port>5077</port>
       <taskId>s4node-0</taskId>
     </node>  

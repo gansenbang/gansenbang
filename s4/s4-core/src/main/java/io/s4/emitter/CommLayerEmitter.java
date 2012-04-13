@@ -148,8 +148,7 @@ public class CommLayerEmitter implements EventEmitter, Runnable {
 			if (listenerAppName == null) {
 				listenerAppName = appName;
 			}
-			sender = new SenderProcess(clusterManagerAddress, appName,
-					listenerAppName);
+			sender = new SenderProcess(clusterManagerAddress, appName, listenerAppName);
 			Map<String, String> map = new HashMap<String, String>();
 			map.put("SenderId", "" + senderId);
 			sender.setSerializer(new PassThroughSerializer());
@@ -173,27 +172,27 @@ public class CommLayerEmitter implements EventEmitter, Runnable {
 			}
 			logger.info("Creating sender process with " + listenerConfig);
 
-			String destinationAppName = (listenerAppName != null ? listenerAppName
-					: listener.getAppName());
+			String destinationAppName = (listenerAppName != null ? listenerAppName : listener.getAppName());
 
-			sender = new SenderProcess(listener.getClusterManagerAddress(),
-					listener.getAppName(), destinationAppName);
+			sender = new SenderProcess(listener.getClusterManagerAddress(), 
+																					listener.getAppName(), 
+																					destinationAppName);
 
 			sender.setSerializer(new PassThroughSerializer());
 			sender.createSenderFromConfig(listenerConfig);
-			nodeCount = sender.getNumOfPartitions();
+			//nodeCount = sender.getNumOfPartitions();
 		}
 		boolean isSent = false;
 		while (!Thread.interrupted()) {
 			isSent = false;
+			nodeCount = sender.getNumOfPartitions();
 			try {
 				MessageHolder mh = messageQueue.take();
 				byte[] rawMessage = mh.getRawMessage();
 				if (listener == null) {
 					isSent = sender.send(rawMessage);
 				} else {
-					isSent = sender.sendToPartition(mh.getPartitionId(),
-							rawMessage);
+					isSent = sender.sendToPartition(mh.getPartitionId(), rawMessage);
 				}
 
 				if (isSent) {

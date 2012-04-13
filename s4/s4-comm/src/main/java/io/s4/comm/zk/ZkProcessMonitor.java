@@ -22,9 +22,12 @@ import io.s4.comm.util.JSONUtil;
 import io.s4.comm.util.ConfigParser.Cluster.ClusterType;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 import org.apache.log4j.Logger;
 import org.apache.zookeeper.KeeperException;
@@ -75,10 +78,8 @@ public class ZkProcessMonitor extends DefaultWatcher implements Runnable,
 				for (String name : children) {
 					Stat stat = zk.exists(processZNode + "/" + name, false);
 					if (stat != null) {
-						byte[] data = zk.getData(processZNode + "/" + name,
-								false, stat);
-						Map<String, Object> map = (Map<String, Object>) JSONUtil
-																																						.getMapFromJson(new String(data));
+						byte[] data = zk.getData(processZNode + "/" + name, false, stat);
+						Map<String, Object> map = (Map<String, Object>) JSONUtil.getMapFromJson(new String(data));
 						String key = (String) map.get("partition");
 						if (key != null) {
 							tempDestinationMap.put(Integer.parseInt(key), map);
@@ -89,6 +90,8 @@ public class ZkProcessMonitor extends DefaultWatcher implements Runnable,
 				destinationList.clear();
 				destinationMap.clear();
 				destinationList.addAll(tempDestinationList);
+				//sort the destinationList
+				Collections.sort(destinationList, new CompareZkNodeByPartitionId());
 				destinationMap.putAll(tempDestinationMap);
 				logger.info("Updated Destination List to" + destinationList);
 				logger.info("Updated Destination Map to" + destinationMap);
@@ -144,6 +147,25 @@ public class ZkProcessMonitor extends DefaultWatcher implements Runnable,
 
 	@Override
 	public int getTaskCount() {
-		return taskCount;
+		if(updateMode){
+			synchronized(lock){
+				return taskCount;
+			}
+		} else {
+			return taskCount;
+		}
+	}
+	
+	private class CompareZkNodeByPartitionId implements Comparator<Object>{
+
+		@Override
+		public int compare(Object o1, Object o2) {
+			Map<String, Object> destmap1 = (Map<String, Object>)o1;
+			Map<String, Object> destmap2 = (Map<String, Object>)o1;
+			String partitionid1 = ((String)destmap1.get("partition")).trim();
+			String partitionid2 = ((String)destmap2.get("partition")).trim();
+			return partitionid1.compareTo(partitionid2);
+		}
+		
 	}
 }

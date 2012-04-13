@@ -37,172 +37,163 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 
 public class Adapter implements EventHandler {
-    private static String coreHome = "../s4_core";
+	private static String coreHome = "../s4_core";
 
-    private EventDispatcher dispatcher;
-    private EventProducer[] eventListeners;
-    private String configFilename;
+	private EventDispatcher dispatcher;
+	private EventProducer[] eventListeners;
+	private String configFilename;
 
-    public void setDispatcher(EventDispatcher dispatcher) {
-        this.dispatcher = dispatcher;
-    }
+	public void setDispatcher(EventDispatcher dispatcher) {
+		this.dispatcher = dispatcher;
+	}
 
-    public void setEventListeners(EventProducer[] eventListeners) {
-        this.eventListeners = eventListeners;
-        for (EventProducer eventListener : eventListeners) {
-            eventListener.addHandler(this);
-        }
-    }
+	public void setEventListeners(EventProducer[] eventListeners) {
+		this.eventListeners = eventListeners;
+		for (EventProducer eventListener : eventListeners) {
+			eventListener.addHandler(this);
+		}
+	}
 
-    public void setConfigFilename(String configFilename) {
-        this.configFilename = configFilename;
-    }
+	public void setConfigFilename(String configFilename) {
+		this.configFilename = configFilename;
+	}
 
-    private volatile int eventCount = 0;
-    private volatile int rawEventCount = 0;
+	private volatile int eventCount = 0;
+	private volatile int rawEventCount = 0;
 
-    public Adapter() {
+	public Adapter() {
 
-    }
+	}
 
-    int counts[];
+	int counts[];
 
-    private boolean init = false;
+	private boolean init = false;
 
-    public void init() {
-        synchronized (this) {
-            init = true;
-        }
-    }
+	public void init() {
+		synchronized (this) {
+			init = true;
+		}
+	}
 
-    public void processEvent(EventWrapper eventWrapper) {
-        try {
-            synchronized (this) {
-                if (!init) {
-                    return;
-                }
-                rawEventCount++;
-                eventCount++;
-            }
-            dispatcher.dispatchEvent(eventWrapper.getStreamName(),
-                                     eventWrapper.getEvent());
-        } catch (Exception e) {
-            Logger.getLogger("dispatcher").info("Exception adapting event", e);
-        }
-    }
+	public void processEvent(EventWrapper eventWrapper) {
+		try {
+			synchronized (this) {
+				if (!init) {
+					return;
+				}
+				rawEventCount++;
+				eventCount++;
+			}
+			dispatcher.dispatchEvent(eventWrapper.getStreamName(),
+					eventWrapper.getEvent());
+		} catch (Exception e) {
+			Logger.getLogger("dispatcher").info("Exception adapting event", e);
+		}
+	}
 
-    public static void main(String args[]) {
-        Options options = new Options();
+	public static void main(String args[]) {
+		Options options = new Options();
 
-        options.addOption(OptionBuilder.withArgName("corehome")
-                                       .hasArg()
-                                       .withDescription("core home")
-                                       .create("c"));
+		options.addOption(OptionBuilder.withArgName("corehome").hasArg()
+				.withDescription("core home").create("c"));
 
-        options.addOption(OptionBuilder.withArgName("instanceid")
-                                       .hasArg()
-                                       .withDescription("instance id")
-                                       .create("i"));
+		options.addOption(OptionBuilder.withArgName("instanceid").hasArg()
+				.withDescription("instance id").create("i"));
 
-        options.addOption(OptionBuilder.withArgName("configtype")
-                                       .hasArg()
-                                       .withDescription("configuration type")
-                                       .create("t"));
+		options.addOption(OptionBuilder.withArgName("configtype").hasArg()
+				.withDescription("configuration type").create("t"));
 
-        options.addOption(OptionBuilder.withArgName("userconfig")
-                                       .hasArg()
-                                       .withDescription("user-defined legacy data adapter configuration file")
-                                       .create("d"));
+		options.addOption(OptionBuilder
+				.withArgName("userconfig")
+				.hasArg()
+				.withDescription("user-defined legacy data adapter configuration file")
+				.create("d"));
 
-        CommandLineParser parser = new GnuParser();
-        CommandLine commandLine = null;
+		CommandLineParser parser = new GnuParser();
+		CommandLine commandLine = null;
 
-        try {
-            commandLine = parser.parse(options, args);
-        } catch (ParseException pe) {
-            System.err.println(pe.getLocalizedMessage());
-            System.exit(1);
-        }
+		try {
+			commandLine = parser.parse(options, args);
+		} catch (ParseException pe) {
+			System.err.println(pe.getLocalizedMessage());
+			System.exit(1);
+		}
 
-        int instanceId = -1;
-        if (commandLine.hasOption("i")) {
-            String instanceIdStr = commandLine.getOptionValue("i");
-            try {
-                instanceId = Integer.parseInt(instanceIdStr);
-            } catch (NumberFormatException nfe) {
-                System.err.println("Bad instance id: %s" + instanceIdStr);
-                System.exit(1);
-            }
-        }
+		int instanceId = -1;
+		if (commandLine.hasOption("i")) {
+			String instanceIdStr = commandLine.getOptionValue("i");
+			try {
+				instanceId = Integer.parseInt(instanceIdStr);
+			} catch (NumberFormatException nfe) {
+				System.err.println("Bad instance id: %s" + instanceIdStr);
+				System.exit(1);
+			}
+		}
 
-        if (commandLine.hasOption("c")) {
-            coreHome = commandLine.getOptionValue("c");
-        }
+		if (commandLine.hasOption("c")) {
+			coreHome = commandLine.getOptionValue("c");
+		}
 
-        String configType = "typical";
-        if (commandLine.hasOption("t")) {
-            configType = commandLine.getOptionValue("t");
-        }
+		String configType = "typical";
+		if (commandLine.hasOption("t")) {
+			configType = commandLine.getOptionValue("t");
+		}
 
-        String userConfigFilename = null;
-        if (commandLine.hasOption("d")) {
-            userConfigFilename = commandLine.getOptionValue("d");
-        }
+		String userConfigFilename = null;
+		if (commandLine.hasOption("d")) {
+			userConfigFilename = commandLine.getOptionValue("d");
+		}
 
-        File userConfigFile = new File(userConfigFilename);
-        if (!userConfigFile.isFile()) {
-            System.err.println("Bad user configuration file: "
-                    + userConfigFilename);
-            System.exit(1);
-        }
+		File userConfigFile = new File(userConfigFilename);
+		if (!userConfigFile.isFile()) {
+			System.err.println("Bad user configuration file: "
+					+ userConfigFilename);
+			System.exit(1);
+		}
 
-        File coreHomeFile = new File(coreHome);
-        if (!coreHomeFile.isDirectory()) {
-            System.err.println("Bad core home: " + coreHome);
-            System.exit(1);
-        }
+		File coreHomeFile = new File(coreHome);
+		if (!coreHomeFile.isDirectory()) {
+			System.err.println("Bad core home: " + coreHome);
+			System.exit(1);
+		}
 
-        if (instanceId > -1) {
-            System.setProperty("instanceId", "" + instanceId);
-        } else {
-            System.setProperty("instanceId", "" + S4Util.getPID());
-        }
+		if (instanceId > -1) {
+			System.setProperty("instanceId", "" + instanceId);
+		} else {
+			System.setProperty("instanceId", "" + S4Util.getPID());
+		}
 
-        String configBase = coreHome + File.separatorChar + "conf"
-                + File.separatorChar + configType;
-        String configPath = configBase + File.separatorChar
-                + "adapter-conf.xml";
-        File configFile = new File(configPath);
-        if (!configFile.exists()) {
-            System.err.printf("adapter config file %s does not exist\n",
-                              configPath);
-            System.exit(1);
-        }
+		String configBase = coreHome + File.separatorChar + "conf" + File.separatorChar + configType;
+		String configPath = configBase + File.separatorChar	+ "adapter-conf.xml";
+		File configFile = new File(configPath);
+		if (!configFile.exists()) {
+			System.err.printf("adapter config file %s does not exist\n", configPath);
+			System.exit(1);
+		}
 
-        // load adapter config xml
-        ApplicationContext coreContext;
-        coreContext = new FileSystemXmlApplicationContext("file:" + configPath);
-        ApplicationContext context = coreContext;
+		// load adapter config xml
+		ApplicationContext coreContext;
+		coreContext = new FileSystemXmlApplicationContext("file:" + configPath);
+		ApplicationContext context = coreContext;
 
-        Adapter adapter = (Adapter) context.getBean("adapter");
+		Adapter adapter = (Adapter) context.getBean("adapter");
 
-        ApplicationContext appContext = new FileSystemXmlApplicationContext(new String[] { "file:"
-                                                                                    + userConfigFilename },
-                                                                            context);
-        Map listenerBeanMap = appContext.getBeansOfType(EventProducer.class);
-        if (listenerBeanMap.size() == 0) {
-            System.err.println("No user-defined listener beans");
-            System.exit(1);
-        }
-        EventProducer[] eventListeners = new EventProducer[listenerBeanMap.size()];
+		ApplicationContext appContext = new FileSystemXmlApplicationContext(
+				new String[] { "file:" + userConfigFilename }, context);
+		Map listenerBeanMap = appContext.getBeansOfType(EventProducer.class);
+		if (listenerBeanMap.size() == 0) {
+			System.err.println("No user-defined listener beans");
+			System.exit(1);
+		}
+		EventProducer[] eventListeners = new EventProducer[listenerBeanMap.size()];
 
-        int index = 0;
-        for (Iterator it = listenerBeanMap.keySet().iterator(); it.hasNext(); index++) {
-            String beanName = (String) it.next();
-            System.out.println("Adding producer " + beanName);
-            eventListeners[index] = (EventProducer) listenerBeanMap.get(beanName);
-        }
+		int index = 0;
+		for (Iterator it = listenerBeanMap.keySet().iterator(); it.hasNext(); index++) {
+			String beanName = (String) it.next();
+			System.out.println("Adding producer " + beanName);
+			eventListeners[index] = (EventProducer) listenerBeanMap.get(beanName);
+		}
 
-        adapter.setEventListeners(eventListeners);
-    }
+		adapter.setEventListeners(eventListeners);
+	}
 }

@@ -215,8 +215,7 @@ public class ConfigParser {
 		try {
 			Document document;
 			// Get a JAXP parser factory object
-			javax.xml.parsers.DocumentBuilderFactory dbf = DocumentBuilderFactory
-					.newInstance();
+			javax.xml.parsers.DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			// Tell the factory what kind of parser we want
 			dbf.setValidating(false);
 			dbf.setIgnoringComments(true);
