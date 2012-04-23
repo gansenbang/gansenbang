@@ -8,6 +8,8 @@ import io.s4.manager.thrift.Cluster;
 import io.s4.manager.thrift.Machine;
 
 public interface DataManager {
+	//定义一个数据管理器
+	//通过一个clustername对应一个机器集群，建议使用map作为数据结构
 	public Map<String, Map<String, String>> GetClusterMessage(String ClusterName);
 	
 	public List<Cluster> GetAllClusters();

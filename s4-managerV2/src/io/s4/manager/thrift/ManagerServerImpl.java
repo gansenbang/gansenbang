@@ -2,7 +2,7 @@ package io.s4.manager.thrift;
 
 import io.s4.manager.core.ServerManager;
 import io.s4.manager.persist.DataManager;
-import io.s4.manager.util.Constant;
+import io.s4.manager.util.Constants;
 
 import java.util.List;
 import java.util.Map;
@@ -40,23 +40,7 @@ public class ManagerServerImpl implements S4Manager.Iface{
 
 	@Override
 	public boolean CommitS4ClusterXMLConfig(String xmlfile,	String clustername) throws TException {
-		if(dm.GetCluster(clustername) == null) return false;
-		
-		boolean isSucc = dm.ReceiveXMLConfig(xmlfile, clustername);
-		if(isSucc){
-			ServerManager sm = dm.GetCluster(clustername);
-			String ClusterConfig = Constant.CONF_PATH + "/" + clustername + "/" + Constant.CLUSTER_FILE; 
-			try {
-				if(sm != null)
-					sm.TaskSetup(ClusterConfig);
-			} catch (Exception e) {
-				e.printStackTrace();
-				return false;
-			}
-		} else 
-			return false;
-		
-		return true;
+		return dm.ReceiveXMLConfig(xmlfile, clustername);
 	}
 
 	@Override
@@ -113,10 +97,6 @@ public class ManagerServerImpl implements S4Manager.Iface{
 		return sm.RecoveryClientAdapter(s4clustername, listenappname, hostport);
 	}
 	
-	public static void main(String[] args){
-		
-	}
-
 	@Override
 	public boolean AddS4Server(String nodeconfig, String clustername,
 			String s4clustername, String adapterclustername) throws TException {

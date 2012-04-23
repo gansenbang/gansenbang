@@ -4,7 +4,7 @@ import io.s4.manager.core.ServerManager;
 import io.s4.manager.thrift.Cluster;
 import io.s4.manager.thrift.Machine;
 import io.s4.manager.util.ConfigParser;
-import io.s4.manager.util.Constant;
+import io.s4.manager.util.Constants;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -35,7 +35,7 @@ public class FileDataManager implements DataManager{
 	
 	public FileDataManager(String XMLFile){
 		if(XMLFile == null || XMLFile.equals("")){
-			this.XMLFile = Constant.CONF_PATH + "/" + Constant.MACHINE_FILE;
+			this.XMLFile = Constants.CONF_PATH + "/" + Constants.MACHINE_FILE;
 		} else {
 			this.XMLFile = XMLFile;
 		}
@@ -47,6 +47,7 @@ public class FileDataManager implements DataManager{
 		}
 		VerifyMachineMap();
 		Setup();
+		System.out.println("Setup OK!");
 	}
 	
 	private void VerifyMachineMap(){
@@ -107,7 +108,7 @@ public class FileDataManager implements DataManager{
 	}
 	
 	private void Setup(){
-		File rootconf = new File(Constant.CONF_PATH);
+		File rootconf = new File(Constants.CONF_PATH);
 		if(rootconf.isDirectory()){
 			for(File smdir : rootconf.listFiles()){
 				if(smdir.isDirectory()){
@@ -130,7 +131,7 @@ public class FileDataManager implements DataManager{
 		File smconfigdir = new File(SMConfigUrl);
 		List<String> MachineList = null;
 		if(smconfigdir.isDirectory()){
-			String SubMachListUrl = SMConfigUrl + "/" + Constant.SUB_MACHINE_FILE;
+			String SubMachListUrl = SMConfigUrl + "/" + Constants.SUB_MACHINE_FILE;
 			File submachlist = new File(SubMachListUrl);
 			if(submachlist.exists() && submachlist.isFile()){
 				try {
@@ -162,12 +163,21 @@ public class FileDataManager implements DataManager{
 
 	@Override
 	public boolean ReceiveXMLConfig(String xmlconfig, String ClusterName) {
-		String dirpath = Constant.CONF_PATH + "/" + ClusterName;
-		File filedir = new File(dirpath);
-		if(!filedir.exists()){
-			filedir.mkdir();
+		ServerManager sm = this.GetCluster(ClusterName);
+		if(sm != null){
+			String dirpath = Constants.CONF_PATH + "/" + ClusterName;
+			File filedir = new File(dirpath);
+			if(!filedir.exists()){
+				filedir.mkdir();
+			}
+			try {
+				sm.TaskSetup(xmlconfig);
+			} catch (Exception e) {
+				e.printStackTrace();
+				return false;
+			}
 		}
-		return true;
+		return false;
 	}
 
 	@Override
@@ -181,8 +191,12 @@ public class FileDataManager implements DataManager{
 		}
 		ServerManager sm;
 		try {
-			String ConfigFileUrl = Constant.CONF_PATH + "/" + target + "/" + Constant.CLUSTER_FILE;
-			new ConfigServerManager(Constant.CONF_PATH + "/" + target + "/" + Constant.SUB_MACHINE_FILE)
+			File clusterdir = new File(Constants.CONF_PATH + "/" + target);
+			if(!clusterdir.exists()){
+				clusterdir.mkdirs();
+			}
+			String ConfigFileUrl = Constants.CONF_PATH + "/" + target + "/" + Constants.CLUSTER_FILE;
+			new ConfigServerManager(Constants.CONF_PATH + "/" + target + "/" + Constants.SUB_MACHINE_FILE)
 				.writeSubMachList(MachineList);
 			sm = new ServerManager(ZkAddress, ConfigFileUrl);
 		} catch (Exception e) {
@@ -205,9 +219,30 @@ public class FileDataManager implements DataManager{
  	}
 	
 	@Override
-	public synchronized boolean RemoveCluster(String ClusterName) {
+	public boolean RemoveCluster(String ClusterName) {
 		ServerManager sm = ClusterMap.get(ClusterName);
-		return sm.RemoveAllS4Cluster();
+		if(sm != null){
+			sm.shutdown();
+			//remove the config file
+			RecurseDelDir(Constants.CONF_PATH + "/" + ClusterName);
+			ClusterMap.remove(ClusterName);
+			return sm.RemoveAllS4Cluster();
+		}
+		return false;
+	}
+	
+	private void RecurseDelDir(String dirpath){
+		File dir = new File(dirpath);
+		if(dir.exists() && dir.isDirectory()){
+			for(File file : dir.listFiles()){
+				if(file.isFile()){
+					file.delete();
+				} else if(file.isDirectory()){
+					RecurseDelDir(file.getAbsolutePath());
+				}
+				dir.delete();
+			}
+		}
 	}
 
 	@Override
@@ -219,7 +254,10 @@ public class FileDataManager implements DataManager{
 	@Override
 	public Map<String, Map<String, String>> GetClusterMessage(String ClusterName) {
 		ServerManager sm = ClusterMap.get(ClusterName);
-		return sm.GetClusterMessage();
+		if(sm != null){
+			return sm.GetClusterMessage();
+		}
+		return null;
 	}
 
 
@@ -304,7 +342,7 @@ public class FileDataManager implements DataManager{
 			//sm.AddS4Server("s4", "client-adapter", NodeConfig);
 			try {
 				sm.TaskSetup(NodeConfig);
-				sm.StartS4ServerCluster("s4", "client-adapter");
+				//sm.StartS4ServerCluster("s4", "client-adapter");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

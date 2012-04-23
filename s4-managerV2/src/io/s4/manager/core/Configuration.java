@@ -21,6 +21,7 @@ public class Configuration {
 	private String ConfigFileUrl;
 	private Integer UpdateMutex = new Integer(-1);
 	private String zkAddress;
+	private Thread updateThread = null;
 	
 	public Configuration(String zkAddress, String ConfigFileUrl){
 		ConfigParser parser = new ConfigParser();
@@ -31,13 +32,16 @@ public class Configuration {
 		try {
 			config = parser.parse(ConfigFileUrl, false , ConfigParser.StringType.CONFIGURL);
 			this.config = config;
-			//readconfig();
 		} catch (Exception e) {
 			//e.printStackTrace();
 		}
 		
 		//start the update configuration thread
-		new Thread(UpdateConfig).start();
+		(updateThread = new Thread(UpdateConfig)).start();
+	}
+	
+	public void close(){
+		updateThread.interrupt();
 	}
 	
 	public Config GetConfig(){
@@ -49,7 +53,6 @@ public class Configuration {
 		Config newconfig = parser.parse(config, false, ConfigParser.StringType.CONFIGCONTENT);
 		synchronized(UpdateMutex){
 			this.config = newconfig;
-			//readconfig();
 			UpdateMutex.notifyAll();
 		}
 		return this.config;
@@ -130,7 +133,7 @@ public class Configuration {
 		@Override
 		public void run() {
 			try {
-				while(true){
+				while(!Thread.currentThread().isInterrupted()){
 					synchronized(UpdateMutex){
 						UpdateMutex.wait();
 						for(Cluster cluster : config.getClusters()){

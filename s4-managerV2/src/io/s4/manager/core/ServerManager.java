@@ -41,6 +41,10 @@ public class ServerManager extends DefaultWatcher {
 		}
 	}
 
+	public boolean shutdown(){
+		config.close();
+		return this.RemoveAllS4Cluster();
+	}
 	/*
 	 * param ClusterConfig:集群的配置信息
 	 * param clean:是否清空原有配置
