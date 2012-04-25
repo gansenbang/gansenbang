@@ -80,7 +80,7 @@
 
 
 
-	<bean id="dispatcher" class="org.apache.s4.dispatcher.Dispatcher"
+	<bean id="dispatcher" class="io.s4.dispatcher.Dispatcher"
 		init-method="init">
 		<property name="partitioners">
 			<list>
@@ -96,7 +96,7 @@
 
 
 
-	<bean id="topKItemPartitioner" class="org.apache.s4.dispatcher.partitioner.DefaultPartitioner">
+	<bean id="topKItemPartitioner" class="io.s4.dispatcher.partitioner.DefaultPartitioner">
 		<property name="streamNames">
 			<list>
 				<value>TopKItem</value>
@@ -111,7 +111,7 @@
 		<property name="debug" value="true" />
 	</bean>
 
-	<bean id="maxItemPartitioner" class="org.apache.s4.dispatcher.partitioner.DefaultPartitioner">
+	<bean id="maxItemPartitioner" class="io.s4.dispatcher.partitioner.DefaultPartitioner">
 		<property name="streamNames">
 			<list>
 				<value>MaxItem</value>
@@ -126,7 +126,7 @@
 		<property name="debug" value="true" />
 	</bean>
 
-	<bean id="minItemPartitioner" class="org.apache.s4.dispatcher.partitioner.DefaultPartitioner">
+	<bean id="minItemPartitioner" class="io.s4.dispatcher.partitioner.DefaultPartitioner">
 		<property name="streamNames">
 			<list>
 				<value>MinItem</value>
@@ -141,7 +141,7 @@
 		<property name="debug" value="true" />
 	</bean>
 
-	<bean id="avgItemPartitioner" class="org.apache.s4.dispatcher.partitioner.DefaultPartitioner">
+	<bean id="avgItemPartitioner" class="io.s4.dispatcher.partitioner.DefaultPartitioner">
 		<property name="streamNames">
 			<list>
 				<value>AvgItem</value>

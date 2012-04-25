@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.apache.s4.persist.Persister;
+import io.s4.persist.Persister;
 
 /**
  * @author ChunweiXu
