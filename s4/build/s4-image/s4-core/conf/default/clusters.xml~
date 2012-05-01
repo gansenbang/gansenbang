@@ -1,0 +1,36 @@
+<config version="-1">
+  <cluster name="s4" type="s4" mode="unicast">
+    <node>
+      <partition>0</partition>
+      <machine>192.168.1.17</machine>
+      <port>5077</port>
+      <taskId>s4node-0</taskId>
+    </node>
+    <node>
+      <partition>1</partition>
+      <machine>192.168.1.100</machine>
+      <port>5078</port>
+      <taskId>s4node-1</taskId>
+    </node>
+    <node>
+      <partition>2</partition>
+      <machine>192.168.1.15</machine>
+      <port>5077</port>
+      <taskId>s4node-2</taskId>
+    </node>
+    <node>
+      <partition>3</partition>
+      <machine>192.168.1.221</machine>
+      <port>5078</port>
+      <taskId>s4node-3</taskId>
+    </node>  
+  </cluster>
+  <cluster name="client-adapter" type="s4" mode="unicast">
+    <node>
+      <partition>0</partition>
+      <machine>192.168.1.221</machine>
+      <taskId>client-adapter-0</taskId>
+      <port>6077</port>
+    </node>
+  </cluster>
+</config>
