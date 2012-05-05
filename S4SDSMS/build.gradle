@@ -35,7 +35,7 @@
 
 /* Set a version number for your app. */
  version = new Version(major: 0, minor: 1, bugfix: 0)
- group = 'alibaba.com'
+ group = 's4.scnu.edu.cn'
 
  /* Read S4_IMAGE environment variable. */
  env = System.getenv()
@@ -69,8 +69,8 @@ applicationName = "S4SDSMSApp"
 
 /* Dependencies. */
 dependencies {
- 	compile('org.apache.s4:s4-core:0.4.0-SNAPSHOT' )
- 	compile('org.apache.s4:s4-driver:0.4.0-SNAPSHOT' )
+ 	compile('io.s4:s4-core:0.3.0' )
+ 	compile('io.s4:s4-driver:0.3.0' )
  	compile('org.json:json:20090211' )
  	compile('com.google.code.gson:gson:1.6' )
  	compile('log4j:log4j:1.2.15' )

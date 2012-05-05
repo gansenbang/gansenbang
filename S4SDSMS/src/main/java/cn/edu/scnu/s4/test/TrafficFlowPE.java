@@ -3,8 +3,8 @@
  */
 package cn.edu.scnu.s4.test;
 
-import org.apache.s4.dispatcher.Dispatcher;
-import org.apache.s4.processor.AbstractPE;
+import io.s4.dispatcher.Dispatcher;
+import io.s4.processor.AbstractPE;
 
 import cn.edu.scnu.s4.TopKItem;
 import cn.edu.scnu.s4.MaxItem;

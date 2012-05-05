@@ -58,7 +58,7 @@ set CMD_LINE_ARGS=%$
 @rem Setup the command line
 
 
-set CLASSPATH=%APP_HOME%\lib\S4SDSMS-0.1.0.jar;%APP_HOME%\lib\s4-core-0.4.0-SNAPSHOT.jar;%APP_HOME%\lib\s4-driver-0.4.0-SNAPSHOT.jar;%APP_HOME%\lib\json-20090211.jar;%APP_HOME%\lib\gson-1.6.jar;%APP_HOME%\lib\log4j-1.2.15.jar;%APP_HOME%\lib\mail-1.4.jar;%APP_HOME%\lib\activation-1.1.jar;%APP_HOME%\lib\commons-cli-1.2.jar;%APP_HOME%\lib\commons-logging-1.1.1.jar;%APP_HOME%\lib\commons-io-2.0.1.jar;%APP_HOME%\lib\commons-configuration-1.6.jar;%APP_HOME%\lib\commons-collections-3.2.1.jar;%APP_HOME%\lib\commons-lang-2.4.jar;%APP_HOME%\lib\commons-digester-1.8.jar;%APP_HOME%\lib\commons-beanutils-1.7.0.jar;%APP_HOME%\lib\commons-beanutils-core-1.8.0.jar;%APP_HOME%\lib\commons-codec-1.4.jar;%APP_HOME%\lib\commons-httpclient-3.1.jar;
+set CLASSPATH=%APP_HOME%\lib\S4SDSMS-0.1.0.jar;%APP_HOME%\lib\s4-core-0.3.0.jar;%APP_HOME%\lib\s4-driver-0.3.0.jar;%APP_HOME%\lib\json-20090211.jar;%APP_HOME%\lib\gson-1.6.jar;%APP_HOME%\lib\log4j-1.2.15.jar;%APP_HOME%\lib\mail-1.4.jar;%APP_HOME%\lib\activation-1.1.jar;%APP_HOME%\lib\commons-cli-1.2.jar;%APP_HOME%\lib\commons-logging-1.1.1.jar;%APP_HOME%\lib\commons-io-2.0.1.jar;%APP_HOME%\lib\commons-configuration-1.6.jar;%APP_HOME%\lib\commons-collections-3.2.1.jar;%APP_HOME%\lib\commons-lang-2.4.jar;%APP_HOME%\lib\commons-digester-1.8.jar;%APP_HOME%\lib\commons-beanutils-1.7.0.jar;%APP_HOME%\lib\commons-beanutils-core-1.8.0.jar;%APP_HOME%\lib\commons-codec-1.4.jar;%APP_HOME%\lib\commons-httpclient-3.1.jar;
 
 @rem Execute S4SDSMSApp
 "%JAVA_EXE%" %JAVA_OPTS% %S_SDSMS_APP_OPTS% -classpath "%CLASSPATH%" cn.edu.scnu.s4.S4SDSMSApp %CMD_LINE_ARGS%

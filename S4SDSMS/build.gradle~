@@ -1,0 +1,140 @@
+/*
+ * Copyright (c) 2011 Yahoo! Inc. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 	        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. See the License for the specific
+ * language governing permissions and limitations under the
+ * License. See accompanying LICENSE file.
+ */
+
+/*
+ * Twitter Topic Count Application Build Script
+ *
+ * Modify this script to create a build script for your app.
+ *
+ * NOTE: You must set up the environment variable S4_IMAGE before
+ * running this script.
+ *
+ * Tasks:
+ *
+ *   gradlew TASK1, TASK2, ... (or gradle TASK1, ... if gradle is installed.)
+ *
+ *   build - builds the application
+ *   install - creates scripts to run applications
+ *   deploy - deploys the S4 app to the S4 image
+ *   clean - cleans build dir and removes app from S4 image
+ *   eclipse - creates an project for the Eclipse IDE
+ */
+
+/* Set a version number for your app. */
+ version = new Version(major: 0, minor: 1, bugfix: 0)
+ group = 'alibaba.com'
+
+ /* Read S4_IMAGE environment variable. */
+ env = System.getenv()
+ s4Image = env['S4_IMAGE']
+
+ if (s4Image == null) {
+     logger.warn("\nEnvironment variable S4_IMAGE not set.")
+     System.exit(-1)
+ }
+
+/* Search these repos to find artifacts. Gradle will download and cache. */
+repositories {
+    flatDir name: 's4core', dirs:  "${s4Image}/s4-core/lib"
+    flatDir name: 's4driver', dirs:  "${s4Image}/s4-driver/lib"
+    mavenLocal()
+    mavenCentral()
+}
+
+/* Include handy Gradle plugins. */
+apply plugin: 'eclipse'
+apply plugin: 'java'
+apply plugin: "application"
+
+/* Set Java version. */
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
+
+/* Main application to run ... */
+mainClassName = "cn.edu.scnu.s4.S4SDSMSApp"
+applicationName = "S4SDSMSApp"
+
+/* Dependencies. */
+dependencies {
+ 	compile('io.s4:s4-core:0.3.0' )
+ 	compile('io.s4:s4-driver:0.3.0' )
+ 	compile('org.json:json:20090211' )
+ 	compile('com.google.code.gson:gson:1.6' )
+ 	compile('log4j:log4j:1.2.15' )
+ 	compile('commons-cli:commons-cli:1.2' )
+ 	compile('commons-logging:commons-logging:1.1.1' )
+ 	compile('commons-io:commons-io:2.0.1' )
+ 	compile('commons-configuration:commons-configuration:1.6' )
+ 	compile('commons-codec:commons-codec:1.4' )
+ 	compile('commons-httpclient:commons-httpclient:3.1' )
+ 	testCompile('junit:junit:4.4' )
+}
+
+/* Customize your jar files. */
+manifest.mainAttributes(
+    provider: 'gradle',
+    'Implementation-Url': 'http://s4.scnu.edu.cn',
+    'Implementation-Version': version,
+    'Implementation-Vendor': 'The S4-SimpleDSMS Project',
+    'Implementation-Vendor-Id': 'scnu.edu.cn'
+)
+
+/* Bug workaround. */
+eclipseClasspath {
+    downloadSources = false; // required for eclipseClasspath to work
+}
+
+/* Create an inage to copy and archive your app. */
+deployImage = copySpec {
+    into ("s4-apps/" + project.name + "/lib") {
+        from project.configurations.runtime
+        from project.configurations.archives.allArtifactFiles
+    }
+    into ("s4-apps/" + project.name) {
+        from project.sourceSets.main.resources
+    }
+}
+
+/* Copy to the S4 Image. */
+task deploy(type: Copy) {
+    description = "Copy app files to deployment dir."
+    destinationDir = file(s4Image)
+    with deployImage
+}
+
+/* Add remove app to the clean task. */
+task cleanDeployment(type: Delete) {
+    delete("${s4Image}/s4-apps/${project.name}")
+}
+clean.dependsOn cleanDeployment
+
+/* Generates the gradlew scripts.
+http://www.gradle.org/1.0-milestone-3/docs/userguide/gradle_wrapper.html */
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.0-milestone-3'
+}
+
+class Version {
+    int major
+    int minor
+    int bugfix
+    String releaseType
+
+    String toString() {
+        "$major.$minor.$bugfix${releaseType ? '-'+releaseType : ''}"
+    }
+}
+
