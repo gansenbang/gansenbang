@@ -1,6 +1,6 @@
 package io.s4.manager.persist;
 
-import io.s4.manager.core.ServerManager;
+import io.s4.manager.core.S4ClusterManager;
 import io.s4.manager.thrift.Cluster;
 import io.s4.manager.thrift.Machine;
 import io.s4.manager.util.ConfigParser;
@@ -27,7 +27,7 @@ import org.w3c.dom.NodeList;
 
 public class FileDataManager implements DataManager{
 
-	private final Map<String, ServerManager> ClusterMap = new ConcurrentHashMap<String, ServerManager>();
+	private final Map<String, S4ClusterManager> ClusterMap = new ConcurrentHashMap<String, S4ClusterManager>();
 	
 	public final Map<String, MachineInfo> MachineMap = new ConcurrentHashMap<String, MachineInfo>();
 	
@@ -152,7 +152,7 @@ public class FileDataManager implements DataManager{
 		for(String clustername : clusternameset){
 			Cluster cluster  = new Cluster();
 			cluster.setClustername(clustername);
-			ServerManager sm = ClusterMap.get(clustername);
+			S4ClusterManager sm = ClusterMap.get(clustername);
 			cluster.setZkAddress(sm.getZkAddress());
 			int number = sm.GetNodeCount();
 			cluster.setNumber(number);
@@ -163,7 +163,7 @@ public class FileDataManager implements DataManager{
 
 	@Override
 	public boolean ReceiveXMLConfig(String xmlconfig, String ClusterName) {
-		ServerManager sm = this.GetCluster(ClusterName);
+		S4ClusterManager sm = this.GetCluster(ClusterName);
 		if(sm != null){
 			String dirpath = Constants.CONF_PATH + "/" + ClusterName;
 			File filedir = new File(dirpath);
@@ -171,13 +171,16 @@ public class FileDataManager implements DataManager{
 				filedir.mkdir();
 			}
 			try {
-				sm.TaskSetup(xmlconfig);
+				System.out.println("xmlconfig=" + xmlconfig);
+				sm.S4ClusterReset(xmlconfig);
 			} catch (Exception e) {
 				e.printStackTrace();
 				return false;
 			}
+		} else {
+			return false;
 		}
-		return false;
+		return true;
 	}
 
 	@Override
@@ -189,7 +192,7 @@ public class FileDataManager implements DataManager{
 			if(ca[0].equals(ClusterName)) return false;
 			if(ca[1].equals(ZkAddress)) return false;
 		}
-		ServerManager sm;
+		S4ClusterManager sm;
 		try {
 			File clusterdir = new File(Constants.CONF_PATH + "/" + target);
 			if(!clusterdir.exists()){
@@ -198,7 +201,7 @@ public class FileDataManager implements DataManager{
 			String ConfigFileUrl = Constants.CONF_PATH + "/" + target + "/" + Constants.CLUSTER_FILE;
 			new ConfigServerManager(Constants.CONF_PATH + "/" + target + "/" + Constants.SUB_MACHINE_FILE)
 				.writeSubMachList(MachineList);
-			sm = new ServerManager(ZkAddress, ConfigFileUrl);
+			sm = new S4ClusterManager(ZkAddress, ConfigFileUrl);
 		} catch (Exception e) {
 			return false;
 		}
@@ -220,13 +223,13 @@ public class FileDataManager implements DataManager{
 	
 	@Override
 	public boolean RemoveCluster(String ClusterName) {
-		ServerManager sm = ClusterMap.get(ClusterName);
+		S4ClusterManager sm = ClusterMap.get(ClusterName);
 		if(sm != null){
 			sm.shutdown();
 			//remove the config file
 			RecurseDelDir(Constants.CONF_PATH + "/" + ClusterName);
 			ClusterMap.remove(ClusterName);
-			return sm.RemoveAllS4Cluster();
+			return sm.StopS4Cluster();
 		}
 		return false;
 	}
@@ -246,14 +249,14 @@ public class FileDataManager implements DataManager{
 	}
 
 	@Override
-	public ServerManager GetCluster(String ClusterName) {
+	public S4ClusterManager GetCluster(String ClusterName) {
 		return ClusterMap.get(ClusterName);
 	}
 
 
 	@Override
 	public Map<String, Map<String, String>> GetClusterMessage(String ClusterName) {
-		ServerManager sm = ClusterMap.get(ClusterName);
+		S4ClusterManager sm = ClusterMap.get(ClusterName);
 		if(sm != null){
 			return sm.GetClusterMessage();
 		}
@@ -334,15 +337,29 @@ public class FileDataManager implements DataManager{
 
 		System.out.println(fdm.GetAllMachine());
 		
-		ServerManager sm = fdm.GetCluster("denghankun@localhost:2181");
-		if(sm != null){
-			String NodeConfig = "<config version=\"-1\"><cluster name=\"s4\" type=\"s4\" mode=\"unicast\">" +
-   " <node><partition>0</partition><machine>192.168.1.15</machine><port>5077</port><taskId>s4node-0</taskId>" +
+		List<String> MachineList = new ArrayList<String>();
+		MachineList.add("192.168.1.15:5077");
+		MachineList.add("192.168.1.15:5078");
+		fdm.AddCluster("denghankun", "localhost:2181", MachineList);
+		
+		System.out.println(fdm.GetAllClusters());
+		
+		String Config = "<config version=\"-1\"><cluster name=\"s4\" type=\"s4\" mode=\"unicast\">" +
+   "<node><partition>0</partition><machine>192.168.1.15</machine><port>5077</port><taskId>s4node-0</taskId>" +
    "</node></cluster></config>";
-			//sm.AddS4Server("s4", "client-adapter", NodeConfig);
+		
+		S4ClusterManager sm = fdm.GetCluster("denghankun@localhost:2181");
+		if(sm != null){
 			try {
-				sm.TaskSetup(NodeConfig);
-				//sm.StartS4ServerCluster("s4", "client-adapter");
+				sm.S4ClusterReset(Config);
+				System.out.println(sm.GetClusterMessage());
+				sm.StartS4ServerCluster("s4", "client-adapter");
+				
+				String NodeConfig = "<config version=\"-1\"><cluster name=\"s4\" type=\"s4\" mode=\"unicast\">" +
+						   "<node><partition>1</partition><machine>192.168.1.15</machine><port>5078</port><taskId>s4node-1</taskId>" +
+						   "</node></cluster></config>";
+				sm.AddS4Server("s4", "client-adapter", NodeConfig);
+				sm.RomoveS4Node("s4", "192.168.1.15:5078");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

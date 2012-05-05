@@ -6,4 +6,36 @@
 		<pass>cloud</pass>
 		<s4image>/home/lenovo/s4project/build/s4-image/scripts</s4image>
 	</machine>
+
+	<machine>
+		<host>192.168.1.15</host>
+		<user>lenovo</user>
+		<port>6077</port>
+		<pass>cloud</pass>
+		<s4image>/home/lenovo/s4project/build/s4-image/scripts</s4image>
+	</machine>
+
+	<machine>
+		<host>192.168.1.100</host>
+		<user>cloud</user>
+		<port>5078</port>
+		<pass>cloud</pass>
+		<s4image>/home/cloud/s4project/build/s4-image/scripts</s4image>
+	</machine>
+
+	<machine>
+		<host>192.168.1.2</host>
+		<user>lenovo</user>
+		<port>5079</port>
+		<pass>cloud</pass>
+		<s4image>/home/lenovo/s4project/build/s4-image/scripts</s4image>
+	</machine>
+
+	<machine>
+		<host>192.168.1.17</host>
+		<user>administrator</user>
+		<port>5080</port>
+		<pass>cloud</pass>
+		<s4image>/home/administrator/s4/build/s4-image/scripts</s4image>
+	</machine>
 </machines>

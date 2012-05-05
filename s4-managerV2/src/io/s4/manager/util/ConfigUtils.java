@@ -45,9 +45,11 @@ public class ConfigUtils {
 			if (node.getPartition() != -1) {
 				nodeInfo.put("partition", String.valueOf(node.getPartition()));
 			}
+			/*
 			if (node.getPort() != -1) {
 				nodeInfo.put("port", String.valueOf(node.getPort()));
 			}
+			*/
 			nodeInfo.put("cluster.type", String.valueOf(clusterType));
 			nodeInfo.put("cluster.name", clusterName);
 			if (isStatic) {

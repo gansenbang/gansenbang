@@ -23,7 +23,7 @@ public class SSHWrapper {
 		BufferedReader br = new BufferedReader(new InputStreamReader(in));
 		String line;
 		while((line = br.readLine()) != null){
-			//System.out.println(line);
+			System.out.println(line);
 			if(line.equals("start finished")) break;
 		}
 	}

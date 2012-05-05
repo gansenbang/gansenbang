@@ -8,8 +8,8 @@ import io.s4.manager.util.ConfigParser.Config;
 import io.s4.manager.util.TaskSetupApp;
 
 public class testtasksetup {
-	public static String setupxml = "/home/denghankun/s4project/s4/build/s4-image/s4-core" +
-			"/conf/dynamic/clusters.xml";
+	public static String setupxml = "/home/denghankun/s4project/s4-managerV2" +
+			"/clusters.xml";
 	
 	public static void main(String[] args) throws Exception{
 		

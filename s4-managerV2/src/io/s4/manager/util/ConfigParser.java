@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -46,12 +47,12 @@ public class ConfigParser {
 					config = processConfigElement(node);
 				}
 			}
-			verifyConfig(config);
+			//verifyConfig(config);
 		}
 		return config;
 	}
 
-	private void verifyConfig(Config config) throws VerifyError{
+	public void verifyConfig(Config config) throws VerifyError{
 		if (config.getClusters().size() == 0) {
 			throw new VerifyError("No clusters specified");
 		}
@@ -62,7 +63,7 @@ public class ConfigParser {
 		}
 	}
 
-	public void verifyCluster(Cluster cluster) throws VerifyError{
+	private void verifyCluster(Cluster cluster) throws VerifyError{
 		if (cluster.getNodes().size() == 0) {
 			throw new VerifyError("No nodes in cluster " + cluster.getName());
 		}
@@ -85,7 +86,7 @@ public class ConfigParser {
 		}
 	}
 
-	public void verifyS4Cluster(Cluster cluster) throws VerifyError{
+	private void verifyS4Cluster(Cluster cluster) throws VerifyError{
 		/*
 		 * rules: 1) if any node has a partition id, a) all must have partition
 		 * ids b) the partition ids must be 0-n, where n is the number of nodes
@@ -119,7 +120,7 @@ public class ConfigParser {
 		}
 	}
 
-	public void verifyAdapterCluster(Cluster cluster) throws VerifyError{
+	private void verifyAdapterCluster(Cluster cluster) throws VerifyError{
 		for (ClusterNode node : cluster.getNodes()) {
 			if (node.getPartition() != -1) {
 				throw new VerifyError(
@@ -332,9 +333,13 @@ public class ConfigParser {
 		public void addCluster(Cluster cluster) {
 			clusters.add(cluster);
 		}
+		
+		public void deleteCluster(Cluster cluster){
+			clusters.remove(cluster);
+		}
 
 		public List<Cluster> getClusters() {
-			return clusters;
+			return Collections.unmodifiableList(clusters);
 		}
 
 		public String toString() {
@@ -365,9 +370,17 @@ public class ConfigParser {
 		public void addNode(ConfigParser.ClusterNode node) {
 			nodes.add(node);
 		}
+		
+		public void deleteNode(ConfigParser.ClusterNode node){
+			nodes.remove(node);
+		}
+		
+		public void sortByPartitionid(){
+			Collections.sort(nodes, new CompareNodeByPartitionid());
+		}
 
 		public List<ConfigParser.ClusterNode> getNodes() {
-			return nodes;
+			return Collections.unmodifiableList(nodes);
 		}
 
 		public String getMode() {
@@ -402,6 +415,15 @@ public class ConfigParser {
 			return sb.toString();
 		}
 
+		public class CompareNodeByPartitionid implements Comparator<ClusterNode>{
+
+			public int compare(ClusterNode o1, ClusterNode o2) {
+				int partitionid1 = o1.getPartition();
+				int partitionid2 = o2.getPartition();
+				return (partitionid1 - partitionid2);
+			}
+			
+		}
 	}
 
 	static public class ClusterNode {

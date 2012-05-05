@@ -37,7 +37,7 @@ public class DefaultWatcher implements Watcher{
 		if(zk == null){
 			try{
 				String sTimeout = System.getProperty("zk.session.timeout");
-				int timeout = 30000;
+				int timeout = 300000000;
 				if(sTimeout != null){
 					try{
 						timeout = Integer.parseInt(sTimeout);

@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.data.Stat;
 
@@ -54,7 +55,46 @@ public class ZkTaskSetup extends DefaultWatcher {
 		this.tasksListRoot = root + "/task";
 		this.processListRoot = root + "/process";
 	}
+	
+	public void close() throws InterruptedException{
+		if(zk != null){
+			zk.close();
+		}
+	}
 
+	public void showTasks(){
+		try {
+			List<String> children = zk.getChildren(this.tasksListRoot, false);
+			System.out.print(this.tasksListRoot + ":");
+			System.out.println(children);
+		} catch (KeeperException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void AddTasks(Object[] data) throws KeeperException, InterruptedException{
+		for(int i = 0; i < data.length; ++i){
+			int taskid = Integer.valueOf(((Map<String, String>)data[i]).get("partition"));
+			String taskpath = this.tasksListRoot + "/task-" + taskid;
+			Stat s = zk.exists(taskpath, false);
+			if(s == null){
+				byte[] byteBuffer = JSONUtil.toJsonString(data[i]).getBytes();
+				zk.create(taskpath, byteBuffer, Ids.OPEN_ACL_UNSAFE,
+						CreateMode.PERSISTENT);
+			}
+		}
+	}
+	
+	public void DeleteTask(int partition) throws KeeperException, InterruptedException{
+		String taskpath = this.tasksListRoot + "task-" + partition;
+		Stat s = zk.exists(taskpath, false);
+		if(s != null){
+			zk.delete(taskpath, -1);
+		}
+	}
+	
 	public void setUpTasks(Object[] data) throws Exception {
 		setUpTasks("-1", data);
 	}
